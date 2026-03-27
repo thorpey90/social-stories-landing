@@ -22,8 +22,7 @@ html, body {
    HERO
 ═══════════════════════════════════════ */
 .hero {
-  min-height: 100vh;
-  min-height: 100svh;
+  min-height: 580px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1677,9 +1676,13 @@ function pricingToggleAccordion(trigger) {
    IFRAME AUTO-HEIGHT (posts height to parent)
 ════════════════════════════════════════ */
 (function () {
+  var timer;
   function sendHeight() {
-    var h = document.documentElement.scrollHeight;
-    window.parent.postMessage({ type: 'iframeHeight', height: h }, '*');
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      var h = document.documentElement.scrollHeight;
+      window.parent.postMessage({ type: 'iframeHeight', height: h }, '*');
+    }, 50);
   }
   window.addEventListener('load', sendHeight);
   if (window.ResizeObserver) {
