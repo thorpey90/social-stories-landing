@@ -798,7 +798,7 @@ html, body {
     <div class="story-book-card">
       <div class="story-book-wrap" id="story-book-wrap">
         <div class="story-book">
-          <img id="story-page-img" src="story-1.png" alt="Page 1"/>
+          <img id="story-page-img" src="1.png" alt="Page 1"/>
           <div class="story-click-prev" onclick="storyPrevPage()"></div>
           <div class="story-click-next" onclick="storyNextPage()"></div>
         </div>
@@ -1414,7 +1414,7 @@ html, body {
   function storyGoTo(n) {
     if (n < 1 || n > totalPages) return;
     img.classList.add('story-fade');
-    setTimeout(() => { currentPage = n; img.src = 'story-' + currentPage + '.png'; img.classList.remove('story-fade'); updateUI(); }, 150);
+    setTimeout(() => { currentPage = n; img.src = currentPage + '.png'; img.classList.remove('story-fade'); updateUI(); }, 150);
   }
 
   window.storyNextPage = function() {
@@ -1628,6 +1628,22 @@ function pricingToggleAccordion(trigger) {
   trigger.classList.toggle('pricing-acc-open', !isOpen);
   trigger.nextElementSibling.classList.toggle('pricing-acc-open', !isOpen);
 }
+
+/* ════════════════════════════════════════
+   IFRAME AUTO-HEIGHT (posts height to parent)
+════════════════════════════════════════ */
+(function () {
+  function sendHeight() {
+    var h = document.documentElement.scrollHeight;
+    window.parent.postMessage({ type: 'iframeHeight', height: h }, '*');
+  }
+  window.addEventListener('load', sendHeight);
+  if (window.ResizeObserver) {
+    new ResizeObserver(sendHeight).observe(document.body);
+  } else {
+    window.addEventListener('resize', sendHeight);
+  }
+})();
 </script>
 
 </body>
