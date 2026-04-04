@@ -1,9 +1,8 @@
 
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Scrabble Page Builder</title>
   <style>
 
@@ -42,7 +41,7 @@
       background: var(--color-bg-primary);
       color: var(--color-text-primary);
       -webkit-font-smoothing: antialiased;
-      padding-bottom: 100px; /* room for toolbar */
+       /* room for toolbar */
     }
 
     h1 {
@@ -513,8 +512,2911 @@
     }
 
   </style>
-</head>
-<body>
+<style>
+    :root {
+      --accent:       #120DA6;
+      --accent-light: #C4E5F2;
+      --accent-bg:    #F2F8FD;
+      --bg:           #F2F0EB;
+      --bg-card:      #ffffff;
+      --text:         #1A1A1A;
+      --text-sec:     #6B6568;
+      --border:       #E8E2D9;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── book page-turn ── */
+    .book-viewer {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+      display: grid;
+      grid-template-columns: 1fr 4px 1fr;
+      min-height: 340px;
+      position: relative;
+    }
+
+    .book-viewer::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 16px 16px 0 0;
+    }
+
+    .book-page {
+      background: #FAFAF7;
+      padding: 36px 32px 44px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .book-page-lines {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        transparent, transparent 30px,
+        rgba(0,0,0,0.018) 30px, rgba(0,0,0,0.018) 31px
+      );
+      pointer-events: none;
+    }
+
+    .book-page > * { position: relative; z-index: 1; }
+
+    .book-page-num {
+      position: absolute;
+      bottom: 14px;
+      left: 0; right: 0;
+      text-align: center;
+      font-size: 10px;
+      color: rgba(0,0,0,0.18);
+      letter-spacing: 0.06em;
+    }
+
+    .book-spine { background: linear-gradient(to right, rgba(0,0,0,0.07), rgba(0,0,0,0.02)); }
+
+    .book-chapter-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .book-title {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 19px;
+      font-weight: 600;
+      line-height: 1.3;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .book-page p {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 14px;
+      line-height: 1.85;
+      color: var(--text);
+      text-align: justify;
+      hyphens: auto;
+    }
+
+    .book-page p + p { text-indent: 1.2em; }
+
+    .book-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+    }
+
+    .book-nav-btn {
+      height: 34px;
+      padding: 0 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-sec);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .book-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .book-nav-btn:disabled { opacity: 0.35; cursor: default; }
+    .book-nav-btn:disabled:hover { border-color: var(--border); color: var(--text-sec); }
+
+    .book-page-indicator {
+      font-size: 11px;
+      color: var(--text-sec);
+    }
+
+    /* ── landing section ── */
+    .section {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: clamp(56px, 10vw, 100px) clamp(20px, 5vw, 40px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+
+    /* ── section header ── */
+    .section-head {
+      text-align: center;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-bg);
+      padding: 5px 14px;
+      border-radius: 999px;
+    }
+
+    .section-title {
+      font-family: 'Lora', Georgia, serif;
+      font-size: clamp(24px, 3.5vw, 34px);
+      font-weight: 600;
+      line-height: 1.25;
+      color: var(--text);
+    }
+
+    .section-body {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-sec);
+    }
+
+    /* ── pill control ── */
+    .pill-control {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px;
+      display: inline-flex;
+      gap: 2px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .pill-btn {
+      height: 36px;
+      padding: 0 20px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-sec);
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+      white-space: nowrap;
+    }
+
+    .pill-btn:hover { color: var(--text); }
+
+    .pill-btn.active {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(18,13,166,0.22);
+    }
+
+    /* ── viewer ── */
+    .viewer { width: 100%; }
+
+    .view { display: none; animation: fadeUp 0.22s ease; }
+    .view.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── format badge ── */
+    .format-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-sec);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 14px;
+      margin-top: 14px;
+    }
+
+    /* ═══════════════════════════════════════
+       VIEW 1 — STORY
+    ═══════════════════════════════════════ */
+    .story-card {
+      background: #FAFAF7;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px clamp(32px, 6vw, 64px);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .story-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 16px 16px 0 0;
+    }
+
+    .story-lines {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        transparent, transparent 30px,
+        rgba(0,0,0,0.018) 30px, rgba(0,0,0,0.018) 31px
+      );
+      pointer-events: none;
+    }
+
+    .story-inner { position: relative; z-index: 1; }
+
+    .story-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .story-title {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .story-body p {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 16px;
+      line-height: 1.85;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    .story-body p:last-child { margin-bottom: 0; }
+
+    /* ═══════════════════════════════════════
+       VIEW 2 — SMS
+    ═══════════════════════════════════════ */
+    .sms-phone {
+      max-width: 380px;
+      margin: 0 auto;
+      background: #1C1C1E;
+      border-radius: 40px;
+      padding: 16px 12px 24px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.12);
+    }
+
+    .sms-notch {
+      width: 100px;
+      height: 28px;
+      background: #1C1C1E;
+      border-radius: 0 0 18px 18px;
+      margin: 0 auto 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .sms-camera {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #2C2C2E;
+      border: 1.5px solid #3A3A3C;
+    }
+
+    .sms-speaker {
+      width: 36px;
+      height: 5px;
+      border-radius: 999px;
+      background: #2C2C2E;
+    }
+
+    .sms-screen {
+      background: #000000;
+      border-radius: 28px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sms-status-bar {
+      background: #000;
+      padding: 8px 20px 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sms-time {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .sms-icons {
+      font-size: 11px;
+      color: #fff;
+      letter-spacing: 2px;
+    }
+
+    .sms-header {
+      background: #1C1C1E;
+      padding: 10px 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 0.5px solid #3A3A3C;
+    }
+
+    .sms-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #5E5CE6, #BF5AF2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .sms-contact-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .sms-messages {
+      background: #000;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 320px;
+    }
+
+    .sms-date-divider {
+      text-align: center;
+      font-size: 11px;
+      color: #8E8E93;
+      margin: 4px 0 8px;
+    }
+
+    .sms-bubble-row {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+    }
+
+    .sms-bubble-row.sent { align-items: flex-end; }
+
+    .sms-bubble {
+      max-width: 82%;
+      padding: 10px 14px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .sms-bubble.received {
+      background: #1C1C1E;
+      color: #fff;
+      border-bottom-left-radius: 4px;
+    }
+
+    .sms-bubble.sent {
+      background: #0A84FF;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .sms-bubble-time {
+      font-size: 10px;
+      color: #8E8E93;
+      padding: 0 4px;
+    }
+
+    .sms-input-bar {
+      background: #1C1C1E;
+      border-top: 0.5px solid #3A3A3C;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sms-input-field {
+      flex: 1;
+      background: #2C2C2E;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 14px;
+      color: #8E8E93;
+    }
+
+    .sms-send-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: #0A84FF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    /* ═══════════════════════════════════════
+       VIEW 3 — EMAIL (macOS Mail style)
+    ═══════════════════════════════════════ */
+    .email-window {
+      background: var(--bg-card);
+      border: 1px solid #C8C4BE;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .email-titlebar {
+      background: linear-gradient(to bottom, #ECEBE8, #E2E0DC);
+      border-bottom: 1px solid #C8C4BE;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .email-titlebar-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .email-titlebar-title {
+      flex: 1;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #4A4845;
+    }
+
+    .email-toolbar {
+      background: #F5F4F2;
+      border-bottom: 1px solid var(--border);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .email-tool-btn {
+      height: 28px;
+      padding: 0 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      font-size: 11px;
+      color: var(--text-sec);
+      cursor: default;
+    }
+
+    .email-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: 500px;
+    }
+
+    .email-sidebar {
+      background: #F5F4F0;
+      border-right: 1px solid var(--border);
+      padding: 12px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .email-sidebar-item {
+      padding: 10px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: default;
+    }
+
+    .email-sidebar-item.active {
+      background: var(--accent);
+    }
+
+    .email-sidebar-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .email-sidebar-preview {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .email-sidebar-from {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .email-sidebar-item.active .email-sidebar-from,
+    .email-sidebar-item.active .email-sidebar-snip,
+    .email-sidebar-item.active .email-sidebar-date {
+      color: #fff;
+    }
+
+    .email-sidebar-snip {
+      font-size: 11px;
+      color: var(--text-sec);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .email-sidebar-date {
+      font-size: 10px;
+      color: var(--text-sec);
+      margin-top: 2px;
+    }
+
+    .email-sidebar-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .email-sidebar-item.active .email-sidebar-dot {
+      background: #fff;
+    }
+
+    .email-content {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .email-content-header {
+      padding: 24px 28px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .email-subject-line {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+
+    .email-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .email-meta-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #34C759, #30B150);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .email-meta-info { display: flex; flex-direction: column; gap: 1px; }
+
+    .email-meta-from {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .email-meta-to {
+      font-size: 12px;
+      color: var(--text-sec);
+    }
+
+    .email-meta-date {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--text-sec);
+      white-space: nowrap;
+    }
+
+    .email-body {
+      padding: 24px 28px 32px;
+      overflow-y: auto;
+    }
+
+    .email-body p {
+      font-size: 14px;
+      line-height: 1.82;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+
+    .email-body p:last-child { margin-bottom: 0; }
+
+    .email-sig {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-sec);
+      line-height: 1.7;
+    }
+
+    .email-sig strong { color: var(--text); display: block; }
+
+    /* ═══════════════════════════════════════
+       VIEW 4 — HANDWRITTEN
+    ═══════════════════════════════════════ */
+    .paper-card {
+      background: #FEFCF0;
+      border: 1px solid #E0D8BE;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+      position: relative;
+    }
+
+    /* red margin line */
+    .paper-card::before {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 52px;
+      width: 1.5px;
+      background: rgba(210, 70, 70, 0.28);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .paper-lines {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        transparent, transparent 31px,
+        rgba(90,120,190,0.11) 31px, rgba(90,120,190,0.11) 32px
+      );
+      pointer-events: none;
+    }
+
+    /* spiral rings */
+    .spiral {
+      position: absolute;
+      top: 0; left: 0;
+      width: 28px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+      gap: 20px;
+      z-index: 3;
+    }
+
+    .spiral-ring {
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      border: 2px solid #C8B89A;
+      background: #FEFCF0;
+      flex-shrink: 0;
+    }
+
+    .paper-inner {
+      position: relative;
+      z-index: 2;
+      padding: 32px 40px 40px 72px;
+    }
+
+    .paper-title {
+      font-family: 'Caveat', cursive;
+      font-size: 28px;
+      font-weight: 600;
+      color: #1a3066;
+      margin-bottom: 4px;
+      line-height: 1.2;
+      text-decoration: underline;
+      text-underline-offset: 5px;
+    }
+
+    .paper-date {
+      font-family: 'Caveat', cursive;
+      font-size: 14px;
+      color: #9C8060;
+      margin-bottom: 20px;
+    }
+
+    .paper-inner p {
+      font-family: 'Caveat', cursive;
+      font-size: 19px;
+      line-height: 2.0;
+      color: #1C2A50;
+    }
+  </style><style>
+    /* ── Apple Design System tokens ── */
+    :root {
+      --color-bg-primary:    #f5f5f7;
+      --color-bg-secondary:  #ffffff;
+      --color-text-primary:  #1d1d1f;
+      --color-text-secondary:#6e6e73;
+      --color-border:        #d2d2d7;
+      --color-link:          #0066cc;
+      --color-success:       #34c759;
+      --color-error:         #ff3b30;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-bg-primary:    #1d1d1f;
+        --color-bg-secondary:  #2c2c2e;
+        --color-text-primary:  #f5f5f7;
+        --color-text-secondary:#98989d;
+        --color-border:        #3a3a3c;
+        --color-link:          #2997ff;
+        --color-success:       #30d158;
+        --color-error:         #ff453a;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+      background: var(--color-bg-primary);
+      color: var(--color-text-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Section wrapper ─── */
+    section.module-nav {
+      background: var(--color-bg-primary);
+      padding: clamp(64px, 8vw, 100px) clamp(20px, 6vw, 60px);
+    }
+
+    .nav-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 48px;
+    }
+
+    /* ─── Section heading ─── */
+    .nav-head {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-head h2 {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--color-text-primary);
+      line-height: 1.1;
+    }
+    .nav-head p {
+      font-size: 17px;
+      color: var(--color-text-primary);
+      max-width: 460px;
+      line-height: 1.55;
+    }
+
+    /* ─── Combined legend strip ─── */
+    .type-legend {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      background: var(--color-bg-secondary);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 12px 20px;
+      width: 100%;
+    }
+    .legend-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .legend-item > span:last-child {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+    .legend-divider {
+      width: 1px;
+      height: 18px;
+      background: var(--color-border);
+      flex-shrink: 0;
+    }
+
+    /* Status dots in legend */
+    .status-legend {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .sl-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+    .sl-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+    .sl-dot.completed   { background: var(--color-link); }
+    .sl-dot.in-progress { background: var(--color-bg-secondary); border: 2px solid var(--color-link); }
+    .sl-dot.not-started { background: var(--color-border); }
+
+    /* ─── Content type tags ─── */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      height: 22px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .tag-scenario { background: rgba(255,59,48,0.10); color: var(--color-error); }
+    .tag-video    { background: rgba(0,102,204,0.10); color: var(--color-link); }
+    .tag-activity {
+      background: var(--color-bg-primary);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+    }
+    @media (prefers-color-scheme: dark) {
+      .tag-scenario { background: rgba(255,69,58,0.15); }
+      .tag-video    { background: rgba(41,151,255,0.15); }
+      .tag-activity { background: var(--color-bg-primary); }
+    }
+
+    /* ─── Module list ─── */
+    .module-list {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .module-row {
+      display: flex;
+      position: relative;
+    }
+
+    /* ─── Spine ─── */
+    .module-spine {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 60px;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .spine-line {
+      position: absolute;
+      top: 44px;
+      bottom: 0;
+      left: 50%;
+      width: 1px;
+      transform: translateX(-50%);
+      background: var(--color-border);
+      transition: background 0.3s ease;
+    }
+    .spine-line.active { background: var(--color-border); }
+
+    .module-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      background: var(--color-bg-secondary);
+      border: 2px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+      flex-shrink: 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      transition: all 0.25s ease;
+    }
+    .module-circle.active {
+      background: var(--color-link);
+      border-color: var(--color-link);
+      color: #ffffff;
+      box-shadow: 0 2px 12px rgba(0,102,204,0.28);
+    }
+
+    /* ─── Module content ─── */
+    .module-content {
+      flex: 1;
+      padding-left: 16px;
+    }
+
+    .module-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0 12px;
+      cursor: pointer;
+      user-select: none;
+      gap: 12px;
+    }
+    .module-header:hover .module-title { color: var(--color-link); }
+
+    .module-meta-label {
+      display: none;
+    }
+    .module-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      transition: color 0.2s;
+    }
+
+    .module-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .module-time {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+    .chevron {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      line-height: 1;
+      transition: transform 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transform: rotate(180deg);
+    }
+    .chevron.open { transform: rotate(0deg); }
+
+    .module-divider {
+      height: 1px;
+      background: var(--color-border);
+    }
+    .module-header[aria-expanded="true"] + .module-divider { display: none; }
+
+    /* ─── Lesson list ─── */
+    .lesson-list {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.38s ease;
+      padding-bottom: 4px;
+    }
+    .lesson-list.open { max-height: 800px; }
+
+    .lesson-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 10px;
+      border-radius: 10px;
+      gap: 10px;
+    }
+    .lesson-left {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .lesson-name {
+      font-size: 15px;
+      color: var(--color-text-primary);
+      font-weight: 400;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ─── Course details toggle ─── */
+    .details-wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .details-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 28px;
+      height: 44px;
+      border-radius: 999px;
+      border: 1.5px solid var(--color-border);
+      background: var(--color-bg-secondary);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .details-toggle-btn:hover {
+      border-color: var(--color-link);
+      color: var(--color-link);
+    }
+    .toggle-chevron {
+      font-size: 12px;
+      transition: transform 0.25s ease;
+      display: inline-flex;
+      transform: rotate(180deg);
+    }
+    .toggle-chevron.open { transform: rotate(0deg); }
+
+    /* ─── Details panel ─── */
+    .details-panel {
+      width: 100%;
+      background: var(--color-bg-secondary);
+      border-radius: 16px;
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      display: none;
+      margin-top: 12px;
+    }
+    .details-panel.open { display: block; }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 28px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .panel-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+    .panel-close-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--color-bg-primary);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--color-text-secondary);
+      transition: background 0.2s;
+      line-height: 1;
+    }
+    .panel-close-btn:hover { background: var(--color-border); }
+
+    .panel-grid {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-cell {
+      padding: 24px 28px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .panel-cell:last-child { border-bottom: none; }
+    .cell-full { border-right: none; }
+
+    .cell-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 16px;
+    }
+
+    /* Learning objectives */
+    .objective-list { display: flex; flex-direction: column; gap: 10px; }
+    .objective-row  { display: flex; align-items: flex-start; gap: 8px; }
+    .objective-row.obj-extra { display: none; }
+    .obj-more-btn {
+      margin-top: 10px;
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-link);
+      cursor: pointer;
+      text-align: left;
+    }
+    .obj-more-btn:hover { opacity: 0.75; }
+    .obj-check {
+      color: var(--color-link);
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+    .obj-text {
+      font-size: 14px;
+      color: var(--color-text-primary);
+      line-height: 1.45;
+    }
+
+    /* Assessment */
+    .assessment-list { display: flex; flex-direction: column; gap: 10px; }
+    .assessment-row  { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .assessment-name { font-size: 14px; color: var(--color-text-primary); }
+    .assess-tag {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .assess-tag.reflective,
+    .assess-tag.quiz        { background: var(--color-bg-primary); color: var(--color-text-secondary); }
+    .assess-tag.certificate { background: rgba(0,102,204,0.08); color: var(--color-link); }
+
+    /* Facilitator */
+    .facilitator { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; }
+    .facilitator-avatar {
+      width: 40px; height: 40px;
+      border-radius: 999px;
+      background: rgba(0,102,204,0.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700;
+      color: var(--color-link);
+      flex-shrink: 0;
+    }
+    .facilitator-name { font-size: 14px; font-weight: 600; color: var(--color-text-primary); }
+    .facilitator-role { font-size: 13px; color: var(--color-text-secondary); margin-top: 2px; }
+    .facilitator-bio  { font-size: 13px; color: var(--color-text-secondary); line-height: 1.55; }
+
+    /* Accreditation */
+    .accred-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+    .accred-tag {
+      padding: 5px 12px;
+      background: var(--color-bg-primary);
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+      font-size: 13px; font-weight: 500;
+      color: var(--color-text-secondary);
+    }
+    .for-text { font-size: 14px; color: var(--color-text-primary); line-height: 1.55; }
+
+    /* Panel footer */
+    .panel-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 28px;
+      background: rgba(0,102,204,0.04);
+      border-top: 1px solid rgba(0,102,204,0.10);
+    }
+    .footer-text { font-size: 15px; color: var(--color-text-primary); line-height: 1.4; }
+    .enquire-btn {
+      display: inline-flex;
+      align-items: center;
+      height: 40px;
+      padding: 0 20px;
+      border-radius: 999px;
+      background: var(--color-link);
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+      flex-shrink: 0;
+    }
+    .enquire-btn:hover { opacity: 0.85; }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 620px) {
+      .panel-grid { grid-template-columns: 1fr; }
+      .panel-cell { border-right: none !important; }
+      .panel-cell:not(:last-child) { border-bottom: 1px solid var(--color-border) !important; }
+      .panel-cell:last-child { border-bottom: none !important; }
+      .panel-footer { flex-direction: column; align-items: flex-start; }
+      .module-time { display: none; }
+      .legend-divider { display: none; }
+    }
+  </style><style>
+    /* ── Apple Design System tokens ── */
+    :root {
+      --color-bg-primary:    #f5f5f7;
+      --color-bg-secondary:  #ffffff;
+      --color-text-primary:  #1d1d1f;
+      --color-text-secondary:#6e6e73;
+      --color-border:        #d2d2d7;
+      --color-link:          #0066cc;
+      --color-link-hover:    #0077ed;
+      --color-link-tint:     rgba(0,102,204,0.08);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-bg-primary:    #1d1d1f;
+        --color-bg-secondary:  #2c2c2e;
+        --color-text-primary:  #f5f5f7;
+        --color-text-secondary:#98989d;
+        --color-border:        #3a3a3c;
+        --color-link:          #2997ff;
+        --color-link-hover:    #59b0ff;
+        --color-link-tint:     rgba(41,151,255,0.12);
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+      background: var(--color-bg-primary);
+      color: var(--color-text-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Outer section ─── */
+    section.scenario-section {
+      padding: clamp(48px, 7vw, 80px) clamp(20px, 6vw, 48px);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ─── Card ─── */
+    .scenario-card {
+      background: var(--color-bg-secondary);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      width: 100%;
+      max-width: 680px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      background: var(--color-bg-primary);
+      padding: 16px 28px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .card-header-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #4a4a4f;
+    }
+
+    .step-strip {
+      font-size: 14px;
+      font-weight: 500;
+      color: #4a4a4f;
+      background: var(--color-bg-secondary);
+      border: 1px solid #b8b8c0;
+      border-radius: 999px;
+      padding: 5px 14px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .card-content {
+      padding: clamp(28px, 5vw, 48px);
+    }
+
+    /* ─── Screens ─── */
+    .screen { display: none; flex-direction: column; gap: 32px; }
+    .screen.active { display: flex; }
+
+    /* ─── Eyebrow ─── */
+    .eyebrow {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+    }
+
+    .screen-heading {
+      font-size: clamp(24px, 3.2vw, 34px);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+      color: var(--color-text-primary);
+    }
+
+    /* ─── Context hero zone ─── */
+    .context-hero {
+      margin: calc(-1 * clamp(28px, 5vw, 48px));
+      margin-bottom: 0;
+      background: linear-gradient(150deg, #f2ede8 0%, #e8ecf2 100%);
+      padding: clamp(28px, 4vw, 40px) clamp(28px, 5vw, 48px) clamp(36px, 4vw, 48px);
+      position: relative;
+      overflow: hidden;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0;
+    }
+
+    /* Type selector — floats between hero and content */
+    .hero-type-selector {
+      display: flex;
+      justify-content: center;
+      margin-top: -53px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-type-selector .context-pills {
+      align-self: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .context-hero {
+        background: linear-gradient(150deg, #2a2420 0%, #1e2228 100%);
+      }
+    }
+
+    .context-hero-svg {
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 340px;
+      height: 240px;
+      pointer-events: none;
+    }
+
+    .context-hero-heading {
+      font-size: clamp(26px, 3.5vw, 38px);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+      color: var(--color-text-primary);
+      position: relative;
+      z-index: 1;
+    }
+
+    .context-hero-sub {
+      display: block;
+      font-size: clamp(18px, 2vw, 22px);
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      margin-top: 6px;
+      letter-spacing: -0.01em;
+    }
+
+    .screen-body {
+      font-size: 19px;
+      line-height: 1.6;
+      color: var(--color-text-primary);
+    }
+
+    .screen-body-secondary {
+      font-size: 19px;
+      line-height: 1.6;
+      color: var(--color-text-secondary);
+    }
+
+    /* ─── Round badge ─── */
+    .round-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: var(--color-link-tint);
+      border: 1px solid var(--color-link);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-link);
+      align-self: flex-start;
+    }
+
+    /* ─── Scenario box ─── */
+    .scenario-box {
+      background: var(--color-bg-primary);
+      border-radius: 12px;
+      border: 1px solid var(--color-border);
+      padding: 18px 20px;
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--color-text-primary);
+    }
+
+    /* ─── Options ─── */
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .option-btn {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 20px;
+      border: none;
+      border-bottom: 1px solid var(--color-border);
+      border-radius: 0;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+      width: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+      transition: background 0.18s;
+    }
+    .option-btn:last-child {
+      border-bottom: none;
+    }
+    .option-btn:hover:not(.selected) {
+      background: var(--color-bg-primary);
+    }
+    .option-btn.selected {
+      background: var(--color-link-tint);
+    }
+    .option-btn.selected .option-letter {
+      background: var(--color-link-tint);
+      border-color: var(--color-link);
+      color: var(--color-link);
+    }
+
+    .option-letter {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: var(--color-bg-primary);
+      border: 1px solid var(--color-border);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      flex-shrink: 0;
+    }
+    .option-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      line-height: 1.4;
+    }
+    .option-body {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--color-text-secondary);
+    }
+
+    /* ─── Consequence card ─── */
+    .consequence-card {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .consequence-card.visible { display: flex; }
+
+    .you-chose {
+      background: var(--color-link-tint);
+      border-left: 3px solid var(--color-link);
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--color-text-primary);
+    }
+    .you-chose strong {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-link);
+      margin-bottom: 4px;
+    }
+
+    .what-happened-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+    }
+    .consequence-text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--color-text-primary);
+    }
+
+    /* ─── Confidence slider ─── */
+    .slider-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .slider-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .slider-q {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      line-height: 1.4;
+    }
+    .slider-val {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-link);
+      min-width: 20px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      margin-top: -4px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      border-radius: 2px;
+      background: linear-gradient(to right, var(--color-link) var(--fill, 50%), var(--color-border) var(--fill, 50%));
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 2px solid var(--color-link);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+      cursor: pointer;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 2px solid var(--color-link);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+      cursor: pointer;
+    }
+
+    /* ─── Optional tag ─── */
+    .optional-tag {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      padding: 3px 10px;
+      border: 1px solid var(--color-border);
+      border-radius: 999px;
+      display: inline-block;
+      align-self: flex-start;
+    }
+
+    /* ─── Emotion pills (Screen 4) ─── */
+    .emotion-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .emotion-pill {
+      padding: 10px 22px;
+      border-radius: 999px;
+      border: 1.5px solid var(--color-border);
+      background: var(--color-bg-secondary);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--color-text-primary);
+      cursor: pointer;
+      transition: all 0.18s;
+      letter-spacing: -0.01em;
+    }
+    .emotion-pill:hover {
+      border-color: var(--color-link);
+      background: var(--color-link-tint);
+      color: var(--color-link);
+    }
+    .emotion-pill.selected {
+      background: var(--color-link-tint);
+      border-color: var(--color-link);
+      color: var(--color-link);
+      font-weight: 600;
+    }
+
+    /* ─── Emoji picker (Screen 4) ─── */
+    .emoji-picker {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .emoji-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px 8px;
+      border-radius: 12px;
+      border: 1.5px solid var(--color-border);
+      background: transparent;
+      cursor: pointer;
+      font-size: 28px;
+      line-height: 1;
+      transition: background 0.18s, border-color 0.18s;
+    }
+    .emoji-btn:hover {
+      background: var(--color-bg-primary);
+    }
+    .emoji-btn.selected {
+      background: var(--color-link-tint);
+      border-color: var(--color-link);
+    }
+
+    /* ─── Feedback screen ─── */
+    .feedback-rounds {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .feedback-round {
+      background: var(--color-bg-primary);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .feedback-round-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      letter-spacing: 0.02em;
+    }
+    .feedback-round-choice {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+    .feedback-round-text {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--color-text-secondary);
+      margin-top: 2px;
+    }
+
+    .takeaway-block {
+      background: var(--color-link-tint);
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .takeaway-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-link);
+      letter-spacing: 0.02em;
+    }
+    .takeaway-text {
+      font-size: clamp(20px, 2.8vw, 24px);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      line-height: 1.4;
+      color: var(--color-text-primary);
+    }
+
+    .try-again-link {
+      background: none;
+      border: none;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+      cursor: pointer;
+      text-decoration: none;
+      padding: 0;
+      transition: color 0.15s ease;
+    }
+    .try-again-link:hover { color: var(--color-text-primary); }
+
+    /* ─── Button row ─── */
+    .btn-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      height: 44px;
+      padding: 0 28px;
+      border-radius: 999px;
+      background: var(--color-link);
+      border: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      transition: background 0.15s ease;
+    }
+    .btn-primary:hover:not(:disabled) { background: var(--color-link-hover); }
+    .btn-primary:disabled {
+      background: var(--color-border);
+      color: var(--color-text-secondary);
+      cursor: default;
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      height: 44px;
+      padding: 0 24px;
+      border-radius: 999px;
+      border: 1px solid var(--color-border);
+      background: transparent;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      transition: border-color 0.15s ease, color 0.15s ease;
+    }
+    .btn-secondary:hover {
+      border-color: var(--color-link);
+      color: var(--color-link);
+    }
+
+    /* ─── Challenge activation block ─── */
+    .eyebrow-active {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-link);
+    }
+
+    .round-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .round-card {
+      background: var(--color-bg-primary);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .round-card-num {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-link);
+      background: var(--color-link-tint);
+      border: 1px solid var(--color-link);
+      border-radius: 999px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .round-card-text {
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1.5;
+      color: var(--color-text-primary);
+    }
+
+    /* ─── Round content wrapper (replaces inline style in buildRound) ─── */
+    .round-content {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      padding-top: 16px;
+    }
+
+    /* ─── Scenario text (Screen 3) ─── */
+    .round-scenario {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .round-scenario p {
+      font-size: 19px;
+      line-height: 1.6;
+      color: var(--color-text-primary);
+    }
+    .round-scenario .scenario-quote {
+      font-size: 19px;
+      line-height: 1.6;
+      color: var(--color-text-primary);
+      font-style: italic;
+    }
+
+    /* ─── Options accordion card ─── */
+    .options-accordion {
+      border: 1.5px solid var(--color-border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--color-bg-secondary);
+    }
+
+    .options-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 16px 20px;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.18s;
+    }
+    .options-trigger:hover:not(:disabled) {
+      background: var(--color-bg-primary);
+    }
+    .options-trigger-chevron {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .options-trigger.open .options-trigger-chevron {
+      transform: rotate(180deg);
+    }
+
+    @media (max-width: 480px) {
+      .round-cards { grid-template-columns: 1fr; }
+    }
+
+    /* ─── Context copy wrapper (Screen 1) ─── */
+    #context-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* ─── Rules list (Screen 1) ─── */
+    .rules-list {
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .rule-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .rule-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-link);
+      letter-spacing: 0.01em;
+    }
+
+    .rule-desc {
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--color-text-secondary);
+    }
+
+    /* ─── Context selector (Screen 1) ─── */
+    .context-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .context-selector-q {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      letter-spacing: 0.01em;
+    }
+
+    /* Segmented control — Apple product filter style */
+    .context-pills {
+      display: inline-flex;
+      background: var(--color-bg-primary);
+      border-radius: 999px;
+      padding: 3px;
+      gap: 0;
+      align-self: flex-start;
+    }
+
+    .context-pill {
+      padding: 10px 22px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--color-text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+      white-space: nowrap;
+      letter-spacing: -0.01em;
+    }
+
+    .context-pill:hover:not(.selected) {
+      background: rgba(0,0,0,0.05);
+      border-radius: 999px;
+    }
+
+    .context-pill.selected {
+      background: var(--color-text-primary);
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .context-pill.selected {
+        background: #f5f5f7;
+        color: #1d1d1f;
+      }
+      .context-pill:hover:not(.selected) {
+        background: rgba(255,255,255,0.08);
+      }
+    }
+
+    /* ─── Quiet button ─── */
+    .btn-quiet {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      transition: color 0.15s ease;
+    }
+    .btn-quiet:hover { color: var(--color-text-primary); }
+
+    /* ─── Challenge stakes sentence (Screen 2 display text) ─── */
+    .challenge-stakes {
+      font-size: clamp(20px, 2.8vw, 24px);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+      color: var(--color-text-primary);
+    }
+
+    /* ─── Full-width primary button (Screen 2 commit) ─── */
+    .btn-primary-full {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 600px) {
+      .btn-row { flex-direction: column; align-items: stretch; }
+      .btn-primary, .btn-secondary { justify-content: center; }
+    }
+  </style><style>
+    /* ── Apple Design System tokens ── */
+    :root {
+      --color-bg-primary:    #f5f5f7;
+      --color-bg-secondary:  #ffffff;
+      --color-text-primary:  #1d1d1f;
+      --color-text-secondary:#6e6e73;
+      --color-border:        #d2d2d7;
+      --color-link:          #0066cc;
+      --color-success:       #34c759;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-bg-primary:    #1d1d1f;
+        --color-bg-secondary:  #2c2c2e;
+        --color-text-primary:  #f5f5f7;
+        --color-text-secondary:#98989d;
+        --color-border:        #3a3a3c;
+        --color-link:          #2997ff;
+        --color-success:       #30d158;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+      background: var(--color-bg-primary);
+      color: var(--color-text-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Section ─── */
+    section.pricing {
+      background: var(--color-bg-primary);
+      padding: clamp(64px, 8vw, 100px) clamp(20px, 6vw, 60px);
+    }
+
+    .pricing-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 56px;
+    }
+
+    /* ─── Heading ─── */
+    .pricing-head {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .pricing-head h2 {
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--color-text-primary);
+    }
+
+
+    /* ─── Card grid ─── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+      align-items: stretch;
+      width: 100%;
+    }
+
+    /* ─── Shared card ─── */
+    .price-card {
+      border-radius: 20px;
+      padding: 40px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* Standard card */
+    .card-standard {
+      background: var(--color-bg-secondary);
+      border: 1px solid var(--color-border);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+
+    /* Featured card */
+    .card-featured {
+      background: rgba(0,102,204,0.04);
+      border: 2px solid var(--color-link);
+      box-shadow: 0 12px 40px rgba(0,102,204,0.18);
+      margin-top: -20px;
+      margin-bottom: -20px;
+      position: relative;
+      padding-top: 48px;
+      padding-bottom: 56px;
+    }
+    @media (prefers-color-scheme: dark) {
+      .card-featured {
+        background: rgba(41,151,255,0.08);
+        box-shadow: 0 12px 40px rgba(41,151,255,0.20);
+      }
+    }
+
+    /* Most popular badge */
+    .popular-badge {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--color-bg-secondary);
+      border: 1.5px solid var(--color-link);
+      border-radius: 999px;
+      padding: 4px 18px;
+      white-space: nowrap;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-link);
+    }
+
+    /* Tier label */
+    .tier-label {
+      font-size: 19px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--color-text-primary);
+    }
+
+    /* Tagline — the ONE sentence */
+    .card-tagline {
+      font-size: 17px;
+      font-weight: 500;
+      line-height: 1.45;
+      color: var(--color-text-primary);
+      letter-spacing: -0.012em;
+    }
+    .card-tagline-light { color: #ffffff; }
+
+    /* Price display */
+    .price-block {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+    }
+    .price-amount {
+      font-size: 42px;
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      line-height: 1;
+      color: var(--color-text-primary);
+    }
+    .price-amount-light { color: #ffffff; }
+    .price-period {
+      font-size: 15px;
+      color: var(--color-text-secondary);
+    }
+    .price-period-light { color: rgba(255,255,255,0.65); }
+    .price-custom {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--color-text-primary);
+    }
+
+    .billing-note {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+    }
+    .billing-note-light { color: rgba(255,255,255,0.5); }
+
+
+    /* CTA button */
+    .cta-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 52px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      text-decoration: none;
+      transition: opacity 0.18s, transform 0.12s;
+      margin-top: auto;
+    }
+    .cta-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .cta-btn:active { transform: scale(0.98); }
+
+    .cta-solid {
+      background: var(--color-link);
+      color: #ffffff;
+    }
+    .cta-filled {
+      background: #ffffff;
+      color: var(--color-link);
+    }
+
+
+    /* ─── Employer PD accordion ─── */
+    .pd-accordion {
+      width: min(560px, 100%);
+      border: 1.5px solid var(--color-border);
+      border-radius: 12px;
+      background: var(--color-bg-secondary);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .pd-accordion.open {
+      border-color: var(--color-link);
+    }
+
+    .pd-header {
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .pd-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pd-info-icon {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      transition: color 0.2s;
+    }
+    .pd-accordion.open .pd-info-icon { color: var(--color-link); }
+    .pd-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      transition: color 0.2s, font-weight 0.2s;
+    }
+    .pd-accordion.open .pd-title {
+      color: var(--color-text-primary);
+      font-weight: 600;
+    }
+    .pd-toggle-icon {
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--color-link);
+      line-height: 1;
+      flex-shrink: 0;
+      width: 20px;
+      text-align: center;
+      transition: transform 0.22s;
+    }
+
+    .pd-body {
+      display: none;
+      padding: 0 20px 18px;
+      border-top: 1px solid var(--color-border);
+    }
+    .pd-accordion.open .pd-body {
+      display: block;
+    }
+    .pd-body-inner {
+      padding-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .pd-body p {
+      font-size: 15px;
+      color: var(--color-text-primary);
+      line-height: 1.55;
+    }
+    .pd-download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-link);
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .pd-download-link:hover { opacity: 0.75; }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 820px) {
+      .card-grid {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+      }
+      .card-featured { margin-top: 0; padding-top: 44px; }
+      .trust-item + .trust-item { border-left: none; border-top: 1px solid var(--color-border); }
+      .trust-bar { flex-direction: column; }
+    }
+  </style><style>
+    :root {
+      --accent:      #120DA6;
+      --accent-bg:   #EEF0FB;
+      --bg:          #F2F0EB;
+      --bg-card:     #ffffff;
+      --text:        #1A1A1A;
+      --text-sec:    #6B6568;
+      --border:      #E8E2D9;
+      --border-soft: #F0EDE8;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: clamp(48px, 8vw, 80px) clamp(20px, 5vw, 40px);
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* ── section heading ── */
+    .section-head {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 520px;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 2px;
+    }
+
+    .section-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: var(--text);
+    }
+
+    .section-body {
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--text-sec);
+      margin-top: 4px;
+    }
+
+    /* ── resource card ── */
+    .resource-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.05);
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      transition: box-shadow 0.2s;
+    }
+
+    .resource-card:hover {
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 8px 28px rgba(0,0,0,0.08);
+    }
+
+    /* ── left content ── */
+    .rc-left {
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* top row: file badge + required tag */
+    .rc-top-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rc-file-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-radius: 5px;
+      padding: 3px 8px;
+    }
+
+    .badge-pdf  { background: #FEF0EF; color: #B83A30; }
+    .badge-docx { background: #EAF0FF; color: #1A5DC8; }
+    .badge-mp4  { background: #F3EDFF; color: #6422C8; }
+
+    .rc-size {
+      font-size: 12px;
+      color: var(--text-sec);
+    }
+
+    .rc-tag {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 5px;
+    }
+
+    .tag-required { background: #FEF0EF; color: #B83A30; }
+    .tag-optional { background: var(--bg); color: var(--text-sec); }
+
+    /* title + description */
+    .rc-title {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.35;
+      color: var(--text);
+    }
+
+    .rc-desc {
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--text-sec);
+    }
+
+    /* divider */
+    .rc-divider {
+      height: 1px;
+      background: var(--border-soft);
+      margin: 2px 0;
+    }
+
+    /* actions */
+    .rc-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Apple-style buttons */
+    .btn-download {
+      height: 34px;
+      padding: 0 16px;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s, opacity 0.15s;
+    }
+
+    .btn-download:hover { background: #0f0b94; }
+
+    .btn-downloaded {
+      height: 34px;
+      padding: 0 14px;
+      border-radius: 8px;
+      border: 1px solid #BFE4C8;
+      background: #F0FAF3;
+      color: #1E7E34;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      cursor: default;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .link-btn {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent);
+      background: none;
+      border: none;
+      cursor: pointer;
+      letter-spacing: -0.01em;
+      text-decoration: underline;
+      text-decoration-color: transparent;
+      transition: text-decoration-color 0.15s;
+    }
+
+    .link-btn:hover { text-decoration-color: var(--accent); }
+
+    .link-skip {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-sec);
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .link-skip:hover { color: var(--text); }
+
+    /* ── right preview panel ── */
+    .rc-right {
+      border-left: 1px solid var(--border-soft);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* PDF panel */
+    .panel-pdf {
+      background: #F0EDE8;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .doc-page {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08);
+      padding: 16px 14px 14px;
+      width: 128px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      transform: rotate(-3deg);
+    }
+
+    .doc-accent-bar {
+      height: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+      width: 52px;
+    }
+
+    .doc-title-bar {
+      height: 9px;
+      background: #2A2A2A;
+      border-radius: 3px;
+      width: 85%;
+    }
+
+    .doc-line {
+      height: 6px;
+      border-radius: 2px;
+      background: #D8D4CC;
+    }
+
+    .doc-check-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .doc-check {
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
+      border: 1.5px solid #C8C4BC;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .doc-check.ticked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .doc-check.ticked::after {
+      content: '';
+      width: 4px;
+      height: 3px;
+      border-left: 1.5px solid #fff;
+      border-bottom: 1.5px solid #fff;
+      transform: rotate(-45deg) translate(0.5px, -0.5px);
+    }
+
+    .doc-check-line {
+      flex: 1;
+      height: 6px;
+      border-radius: 2px;
+      background: #D8D4CC;
+    }
+
+    /* DOCX panel */
+    .panel-docx {
+      background: #E8EEFA;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .docx-page {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+      padding: 14px 12px;
+      width: 128px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      transform: rotate(2deg);
+    }
+
+    .docx-w {
+      font-size: 16px;
+      font-weight: 800;
+      color: #1A5DC8;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    .docx-title {
+      height: 8px;
+      background: #2A2A2A;
+      border-radius: 3px;
+      width: 80%;
+    }
+
+    .docx-line { height: 5px; border-radius: 2px; background: #D8D4CC; }
+
+    .docx-input {
+      height: 22px;
+      background: #F0F4FF;
+      border-radius: 4px;
+      border: 1px solid #C8D4F0;
+      margin: 2px 0;
+    }
+
+    /* MP4 panel */
+    .panel-mp4 {
+      background: #111;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .mp4-play {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      border: 1.5px solid rgba(255,255,255,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #fff;
+    }
+
+    .mp4-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.55);
+      text-align: center;
+      letter-spacing: -0.01em;
+    }
+
+    .mp4-dur {
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
+      margin-top: -6px;
+    }
+  </style><style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Dark CTA section ─── */
+    section.about-cta {
+      background: #032626;
+      padding: clamp(72px, 10vw, 112px) clamp(24px, 6vw, 64px);
+    }
+
+    .cta-inner {
+      max-width: 640px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      text-align: center;
+    }
+
+    /* ─── Heading ─── */
+    .cta-heading {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+    }
+    .cta-heading h2 {
+      font-size: clamp(26px, 3.5vw, 40px);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+      color: #ffffff;
+    }
+
+    /* ─── Body ─── */
+    .cta-body {
+      font-size: 16px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.62);
+      max-width: 400px;
+    }
+
+    /* ─── Buttons ─── */
+    .cta-buttons {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      height: 52px;
+      padding: 0 36px;
+      border-radius: 12px;
+      background: #ffffff;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #032626;
+      text-decoration: none;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.22);
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.92; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      height: 52px;
+      padding: 0 36px;
+      border-radius: 12px;
+      background: transparent;
+      border: 1.5px solid rgba(255,255,255,0.42);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #ffffff;
+      text-decoration: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .btn-ghost:hover {
+      border-color: rgba(255,255,255,0.72);
+      background: rgba(255,255,255,0.07);
+    }
+
+    @media (max-width: 480px) {
+      .cta-buttons { flex-direction: column; width: 100%; }
+      .btn-primary, .btn-ghost { width: 100%; justify-content: center; }
+    }
+  </style></head>
+<body class="">
 
   <!-- ========================================================
        APP TOOLBAR  (removed when saving clean HTML)
@@ -529,34 +3431,12 @@
   </div>
   <!-- BUILDER:DROP:END -->
 
-  <!-- BUILDER:TOOLBAR:START -->
-  <div id="app-toolbar">
-    <span class="tb-label">🛠 Builder</span>
-    <div class="tb-divider"></div>
-    <button class="tb-btn tb-btn-blue" id="btn-edit" onclick="toggleEditMode()">✏️ Edit Text</button>
-    <button class="tb-btn tb-btn-ghost" id="btn-add" onclick="openAddModal()">➕ Add Section</button>
-    <div class="tb-divider"></div>
-    <button class="tb-btn tb-btn-green" id="btn-save" onclick="saveFile()">💾 Save</button>
-  </div>
-  <div id="toast"></div>
-  <!-- BUILDER:TOOLBAR:END -->
+  
 
   <!-- ========================================================
        ADD SECTION MODAL
   ======================================================== -->
-  <!-- BUILDER:MODAL:START -->
-  <div id="modal-overlay" onclick="handleOverlayClick(event)">
-    <div id="modal-box">
-      <h3>Add a New Section</h3>
-      <p>Paste the full HTML of your section below. Styles and scripts will be extracted and added to the page automatically.</p>
-      <textarea id="section-html-input" placeholder="Paste your section HTML here…"></textarea>
-      <div class="modal-actions">
-        <button class="modal-btn modal-btn-cancel" onclick="closeAddModal()">Cancel</button>
-        <button class="modal-btn modal-btn-add" onclick="confirmAddSection()">Add to Page</button>
-      </div>
-    </div>
-  </div>
-  <!-- BUILDER:MODAL:END -->
+  
 
   <!-- ========================================================
        PAGE SECTIONS — all content lives here
@@ -568,10 +3448,7 @@
       <div class="container">
         <div class="hero-inner">
 
-          <h1 style="max-width: min(900px,100%); text-align:center;" data-editable>
-            This is a H1 heading<br>
-            that uses <span style="color:var(--color-link);">accent words</span>
-          </h1>
+          <h1 style="max-width: min(900px,100%); text-align:center;" data-editable="" contenteditable="false"><div><span style="font-size: clamp(48px, 6vw, 96px); letter-spacing: -0.02em; font-family: -apple-system, BlinkMacSystemFont, &quot;SF Pro Text&quot;, &quot;Helvetica Neue&quot;, sans-serif;">Writing&nbsp;</span><span style="font-size: clamp(48px, 6vw, 96px); letter-spacing: -0.02em; font-family: -apple-system, BlinkMacSystemFont, &quot;SF Pro Text&quot;, &quot;Helvetica Neue&quot;, sans-serif;">Social Stories shouldn't </span><font color="#0066cc" style="font-size: clamp(48px, 6vw, 96px); letter-spacing: -0.02em; font-family: -apple-system, BlinkMacSystemFont, &quot;SF Pro Text&quot;, &quot;Helvetica Neue&quot;, sans-serif;">feel hard.</font></div></h1>
 
           <div class="book-wrap">
             <div class="book-stack">
@@ -580,39 +3457,37 @@
               <div class="book-page">
                 <div class="book-progress">
                   <div class="book-progress-track">
-                    <div class="book-progress-fill" id="progress-fill" style="width:20%;"></div>
+                    <div class="book-progress-fill" id="progress-fill" style="width: 100%;"></div>
                   </div>
                 </div>
-                <div class="book-content" id="book-content">
-                  <p id="book-text">This is body text inside the book component. Each page shares a story, a finding, or a practitioner insight that draws the learner in before the CTA.</p>
-                </div>
+                <div class="book-content" id="book-content"><p id="book-text" contenteditable="false">What if you could drink your coffee, enjoy your Tim Tam, answer a few questions, and have a social story ready before your morning-tea break is over?<br><br>We call it Story Builder.</p></div>
                 <div class="book-curl"></div>
               </div>
             </div>
             <div class="book-nav">
-              <div class="nav-arrow disabled" id="btn-prev" onclick="changePage(-1)">‹</div>
+              <div class="nav-arrow" id="btn-prev" onclick="changePage(-1)">‹</div>
               <div class="page-counter">
                 <span class="page-counter-label">Page</span>
-                <span class="page-counter-num" id="page-current">1</span>
+                <span class="page-counter-num" id="page-current">5</span>
                 <span class="page-counter-label">of</span>
                 <span class="page-counter-num" id="page-total">5</span>
               </div>
               <div class="page-dots" id="page-dots">
+                <div class="page-dot"></div>
+                <div class="page-dot"></div>
+                <div class="page-dot"></div>
+                <div class="page-dot"></div>
                 <div class="page-dot active"></div>
-                <div class="page-dot"></div>
-                <div class="page-dot"></div>
-                <div class="page-dot"></div>
-                <div class="page-dot"></div>
               </div>
-              <div class="nav-arrow" id="btn-next" onclick="changePage(1)">›</div>
+              <div class="nav-arrow disabled" id="btn-next" onclick="changePage(1)">›</div>
             </div>
           </div>
 
-          <h2 style="text-align:center;" data-editable>This is a H2 heading</h2>
+          <h2 style="text-align:center;" data-editable="" contenteditable="false">That's why we built Story Builder.</h2>
 
           <div class="cta-group">
-            <a href="#" class="btn-primary"><span data-editable>Primary Button</span></a>
-            <a href="#" class="btn-secondary"><span data-editable>Secondary Button</span></a>
+            <a href="#" class="btn-primary"><span data-editable="" contenteditable="false">Start your first story</span></a>
+            <a href="#" class="btn-secondary"><span data-editable="" contenteditable="false">See inside the course</span></a>
           </div>
 
         </div>
@@ -626,15 +3501,15 @@
     <section class="story-section">
       <div class="story-grid">
         <div class="story-left">
-          <span class="eyebrow" data-editable>Example</span>
-          <h2 data-editable>This is what a social story looks like.</h2>
-          <p data-editable>Written by an education support worker for one student, about one important moment. Scroll through and see.</p>
+          <span class="eyebrow" data-editable="" contenteditable="false"><br></span>
+          <h2 data-editable="" contenteditable="false">Robbie S. made this for a student in his class who wanted to make stronger friendships.</h2>
+          <p data-editable="" contenteditable="false"><br></p>
         </div>
         <div class="story-right">
           <div class="photo-card">
-            <div class="photo-area" id="photoArea"></div>
+            <div class="photo-area" id="photoArea"><div class="photo-slide active" id="slide-0" style="background: linear-gradient(135deg, rgb(240, 235, 225), rgb(232, 223, 211));"><div class="photo-icon">📖</div><p class="photo-label" id="label-0" contenteditable="false">Cover page — hand-drawn title: "When I Helped a New Friend"</p></div><div class="photo-slide" id="slide-1" style="background: linear-gradient(135deg, rgb(232, 240, 248), rgb(216, 232, 244));"><div class="photo-icon">🪑</div><p class="photo-label" id="label-1" contenteditable="false">Jamie sits alone at the lunch table. There is an empty seat beside them.</p></div><div class="photo-slide" id="slide-2" style="background: linear-gradient(135deg, rgb(254, 243, 232), rgb(253, 232, 212));"><div class="photo-icon">👀</div><p class="photo-label" id="label-2" contenteditable="false">A new student named Sam arrives and looks around the room nervously.</p></div><div class="photo-slide" id="slide-3" style="background: linear-gradient(135deg, rgb(237, 245, 238), rgb(220, 238, 221));"><div class="photo-icon">💭</div><p class="photo-label" id="label-3" contenteditable="false">Jamie notices Sam looking for somewhere to sit.</p></div><div class="photo-slide" id="slide-4" style="background: linear-gradient(135deg, rgb(248, 240, 232), rgb(240, 228, 216));"><div class="photo-icon">✏️</div><p class="photo-label" id="label-4" contenteditable="false">Jamie thinks: "Maybe I could say hello." A speech bubble is drawn above their head.</p></div><div class="photo-slide" id="slide-5" style="background: linear-gradient(135deg, rgb(232, 239, 248), rgb(216, 228, 244));"><div class="photo-icon">👋</div><p class="photo-label" id="label-5" contenteditable="false">Jamie takes a deep breath and gives a small wave across the table.</p></div><div class="photo-slide" id="slide-6" style="background: linear-gradient(135deg, rgb(254, 248, 232), rgb(253, 239, 216));"><div class="photo-icon">😊</div><p class="photo-label" id="label-6" contenteditable="false">Sam waves back and smiles. A big drawn smile fills the page.</p></div><div class="photo-slide" id="slide-7" style="background: linear-gradient(135deg, rgb(236, 244, 238), rgb(220, 234, 224));"><div class="photo-icon">🤝</div><p class="photo-label" id="label-7" contenteditable="false">Sam walks over and sits down next to Jamie at the table.</p></div><div class="photo-slide" id="slide-8" style="background: linear-gradient(135deg, rgb(244, 238, 248), rgb(234, 222, 244));"><div class="photo-icon">🥪</div><p class="photo-label" id="label-8" contenteditable="false">Jamie and Sam both open their lunch boxes and peek at what is inside.</p></div><div class="photo-slide" id="slide-9" style="background: linear-gradient(135deg, rgb(255, 240, 232), rgb(255, 228, 212));"><div class="photo-icon">😄</div><p class="photo-label" id="label-9" contenteditable="false">They both laugh at something funny. Wiggly laugh lines are drawn around them.</p></div><div class="photo-slide" id="slide-10" style="background: linear-gradient(135deg, rgb(232, 244, 248), rgb(216, 236, 244));"><div class="photo-icon">👍</div><p class="photo-label" id="label-10" contenteditable="false">The teacher walks past and gives Jamie a big thumbs up.</p></div><div class="photo-slide" id="slide-11" style="background: linear-gradient(135deg, rgb(240, 244, 232), rgb(228, 236, 220));"><div class="photo-icon">💛</div><p class="photo-label" id="label-11" contenteditable="false">At the end of the day, Jamie draws a heart in the middle of the page. They feel good inside.</p></div><div class="photo-slide" id="slide-12" style="background: linear-gradient(135deg, rgb(237, 232, 244), rgb(224, 216, 236));"><div class="photo-icon">🌟</div><p class="photo-label" id="label-12" contenteditable="false">Back cover — "The End. You did great, Jamie." Signed by the author.</p></div></div>
             <div class="card-footer">
-              <button class="arrow-btn" id="prevBtn" onclick="navigate(-1)" disabled>‹</button>
+              <button class="arrow-btn" id="prevBtn" onclick="navigate(-1)" disabled="">‹</button>
               <span class="card-page-counter" id="pageCounter">1 / 13</span>
               <button class="arrow-btn" id="nextBtn" onclick="navigate(1)">›</button>
             </div>
@@ -643,19 +3518,784 @@
       </div>
     </section>
 
-  </div><!-- /sections-container -->
+  <div class="divider-wrap"><div class="section-divider"></div></div><div data-section="added-1775282344638">
+
+<div class="section">
+
+  <div class="section-head">
+    <span class="eyebrow" data-editable="" contenteditable="false">Social Stories</span>
+    <h2 class="section-title" data-editable="" contenteditable="false">A Social Story isn't always a story.</h2>
+    <p class="section-body" data-editable="" contenteditable="false">Good moments need Social Stories too.</p>
+  </div>
+
+  <div class="pill-control">
+    <button class="pill-btn active" onclick="switchView('story')" id="tab-story" data-editable="" contenteditable="false">Story</button>
+    <button class="pill-btn" onclick="switchView('text')" id="tab-text" data-editable="" contenteditable="false">SMS</button>
+    <button class="pill-btn" onclick="switchView('email')" id="tab-email" data-editable="" contenteditable="false">Email</button>
+    <button class="pill-btn" onclick="switchView('handwritten')" id="tab-handwritten" data-editable="" contenteditable="false">Note</button>
+  </div>
+
+  <div class="viewer">
+
+    <!-- STORY — paged book -->
+    <div class="view active" id="view-story">
+      <div class="book-viewer" id="bookViewer">
+        <!-- left page -->
+        <div class="book-page" id="bookLeft">
+          <div class="book-page-lines"></div>
+          <span class="book-chapter-label" id="bookLeftLabel" data-editable="" contenteditable="false">Social Story · Carol Gray</span>
+          <h3 class="book-title" id="bookLeftTitle" data-editable="" contenteditable="false">When I Feel Worried</h3>
+          <p id="bookLeftP1" data-editable="" contenteditable="false">Sometimes I feel worried. This can happen when something new is about to happen, or when I am not sure what to do next.</p>
+          <p id="bookLeftP2" data-editable="" contenteditable="false">When I feel worried, my tummy might feel strange. My heart might beat a little faster. These feelings are normal. They happen to most people.</p>
+          <div class="book-page-num" id="bookLeftNum">1</div>
+        </div>
+        <div class="book-spine"></div>
+        <!-- right page -->
+        <div class="book-page" id="bookRight">
+          <div class="book-page-lines"></div>
+          <p id="bookRightP1" data-editable="" contenteditable="false">Other people — like teachers, parents, and friends — sometimes feel worried too. They understand that feeling worried is okay.</p>
+          <p id="bookRightP2" data-editable="" contenteditable="false">When I feel worried, I can take a slow, deep breath. I can find a trusted person and let them know how I am feeling.</p>
+          <div class="book-page-num" id="bookRightNum">2</div>
+        </div>
+      </div>
+
+      <div class="book-nav" style="margin-top:14px;">
+        <button class="book-nav-btn" id="bookPrev" onclick="turnPage(-1)" disabled="" data-editable="" contenteditable="false">← Prev</button>
+        <span class="book-page-indicator" id="bookIndicator" data-editable="" contenteditable="false">Pages 1–2 of 4</span>
+        <button class="book-nav-btn" id="bookNext" onclick="turnPage(1)" data-editable="" contenteditable="false">Next →</button>
+      </div>
+
+      <div class="format-badge">📖 Story format — the traditional way Carol Gray presented social stories</div>
+    </div>
+
+    <!-- SMS -->
+    <div class="view" id="view-text">
+      <div class="sms-phone">
+        <div class="sms-notch">
+          <div class="sms-speaker"></div>
+          <div class="sms-camera"></div>
+        </div>
+        <div class="sms-screen">
+          <div class="sms-status-bar">
+            <span class="sms-time" data-editable="" contenteditable="false">9:41</span>
+            <span class="sms-icons" data-editable="" contenteditable="false">▶▶ ⬛⬛⬛</span>
+          </div>
+          <div class="sms-header">
+            <div class="sms-avatar">SC</div>
+            <div class="sms-contact-name">Sarah (School Support)</div>
+          </div>
+          <div class="sms-messages">
+            <div class="sms-date-divider">Today 9:38 AM</div>
+
+            <div class="sms-bubble-row">
+              <div class="sms-bubble received">Hi Rachel! I've written a quick social story for Liam. Thought you might like to read it with him tonight 😊</div>
+              <span class="sms-bubble-time" data-editable="" contenteditable="false">9:38</span>
+            </div>
+
+            <div class="sms-bubble-row">
+              <div class="sms-bubble received">📖 <strong>When I Feel Worried</strong></div>
+            </div>
+
+            <div class="sms-bubble-row">
+              <div class="sms-bubble received">Sometimes I feel worried. This can happen when something new is about to happen, or when I'm not sure what to do next.</div>
+            </div>
+
+            <div class="sms-bubble-row">
+              <div class="sms-bubble received">When I feel worried, my tummy might feel strange. My heart might beat faster. These feelings are normal — they happen to most people.</div>
+            </div>
+
+            <div class="sms-bubble-row">
+              <div class="sms-bubble received">When I feel worried, I can take a slow breath. I can find a trusted person. I can remember the worried feeling will pass. 💙</div>
+              <span class="sms-bubble-time" data-editable="" contenteditable="false">9:39</span>
+            </div>
+
+            <div class="sms-bubble-row sent">
+              <div class="sms-bubble sent">That's lovely, thank you! We'll read it at bedtime</div>
+              <span class="sms-bubble-time" data-editable="" contenteditable="false">9:41</span>
+            </div>
+          </div>
+          <div class="sms-input-bar">
+            <div class="sms-input-field">Message</div>
+            <div class="sms-send-btn">↑</div>
+          </div>
+        </div>
+      </div>
+      <div class="format-badge">💬 SMS — sent directly to a parent or carer via text message</div>
+    </div>
+
+    <!-- EMAIL — macOS Mail -->
+    <div class="view" id="view-email">
+      <div class="email-window">
+        <div class="email-titlebar">
+          <div class="email-titlebar-dots">
+            <div class="chrome-dot" style="background:#FF5F57;"></div>
+            <div class="chrome-dot" style="background:#FFBD2E;"></div>
+            <div class="chrome-dot" style="background:#28C840;"></div>
+          </div>
+          <div class="email-titlebar-title">Mail — Inbox</div>
+          <div style="width:52px;"></div>
+        </div>
+        <div class="email-layout">
+          <!-- sidebar message list -->
+          <div class="email-sidebar">
+            <div class="email-sidebar-item" style="opacity:0.5;">
+              <div style="width:8px; height:8px; flex-shrink:0; margin-top:4px;"></div>
+              <div class="email-sidebar-avatar" style="background:linear-gradient(135deg,#FF9500,#FF6000);">MN</div>
+              <div class="email-sidebar-preview">
+                <div class="email-sidebar-from">Michael N.</div>
+                <div class="email-sidebar-snip">Re: Thursday meeting</div>
+                <div class="email-sidebar-date">Yesterday</div>
+              </div>
+            </div>
+            <div class="email-sidebar-item active">
+              <div class="email-sidebar-dot"></div>
+              <div class="email-sidebar-avatar" style="background:linear-gradient(135deg,#34C759,#30B150);">SC</div>
+              <div class="email-sidebar-preview">
+                <div class="email-sidebar-from">Sarah Chen</div>
+                <div class="email-sidebar-snip">Social story for Liam</div>
+                <div class="email-sidebar-date">9:41 AM</div>
+              </div>
+            </div>
+            <div class="email-sidebar-item" style="opacity:0.5;">
+              <div style="width:8px; height:8px; flex-shrink:0; margin-top:4px;"></div>
+              <div class="email-sidebar-avatar" style="background:linear-gradient(135deg,#5E5CE6,#BF5AF2);">GP</div>
+              <div class="email-sidebar-preview">
+                <div class="email-sidebar-from">Greenfield Primary</div>
+                <div class="email-sidebar-snip">Term 2 newsletter</div>
+                <div class="email-sidebar-date">Mon</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- email content -->
+          <div class="email-content">
+            <div class="email-content-header">
+              <div class="email-subject-line">Social story for Liam — When I Feel Worried</div>
+              <div class="email-meta-row">
+                <div class="email-meta-avatar">SC</div>
+                <div class="email-meta-info">
+                  <div class="email-meta-from">Sarah Chen</div>
+                  <div class="email-meta-to">To: Rachel Nguyen &lt;r.nguyen@familymail.com&gt;</div>
+                </div>
+                <div class="email-meta-date">Today, 9:41 AM</div>
+              </div>
+            </div>
+            <div class="email-body">
+              <p data-editable="" contenteditable="false">Hi Rachel,</p>
+              <p data-editable="" contenteditable="false">As we discussed last week, I've put together a short social story for Liam that we can use before situations he finds tricky. Feel free to read it with him at home, or print it out and keep it somewhere easy to find.</p>
+              <p data-editable="" contenteditable="false"><strong>When I Feel Worried</strong></p>
+              <p data-editable="" contenteditable="false">Sometimes I feel worried. This can happen when something new is about to happen, or when I am not sure what to do next.</p>
+              <p data-editable="" contenteditable="false">When I feel worried, my tummy might feel strange. My heart might beat a little faster. These feelings are normal. They happen to most people.</p>
+              <p data-editable="" contenteditable="false">When I feel worried, I can take a slow, deep breath. I can find a trusted person and let them know how I am feeling. I can remind myself that the worried feeling will pass.</p>
+              <p data-editable="" contenteditable="false">I am learning to manage worried feelings, and I am doing really well.</p>
+              <p data-editable="" contenteditable="false">Let me know if you'd like to talk through how to use it. Happy to help.</p>
+              <div class="email-sig">
+                <strong>Sarah Chen</strong>
+                Learning Support Coordinator<br>
+                Greenfield Primary School<br>
+                s.chen@schoolsupport.edu.au
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="format-badge">✉️ Email — shared directly with a parent, carer, or support worker</div>
+    </div>
+
+    <!-- HANDWRITTEN -->
+    <div class="view" id="view-handwritten">
+      <div class="paper-card">
+        <div class="spiral">
+          <div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div>
+          <div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div>
+          <div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div>
+          <div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div>
+        </div>
+        <div class="paper-lines"></div>
+        <div class="paper-inner">
+          <div class="paper-title">When I Feel Worried</div>
+          <div class="paper-date">Written for Liam, March 2026</div>
+          <p data-editable="" contenteditable="false">Sometimes I feel worried. This can happen</p>
+          <p data-editable="" contenteditable="false">when something new is about to happen, or</p>
+          <p data-editable="" contenteditable="false">when I'm not sure what to do next.</p>
+          <p data-editable="" contenteditable="false">&nbsp;</p>
+          <p data-editable="" contenteditable="false">When I feel worried, my tummy might feel</p>
+          <p data-editable="" contenteditable="false">strange. My heart might beat faster.</p>
+          <p data-editable="" contenteditable="false">These feelings are normal — most people</p>
+          <p data-editable="" contenteditable="false">feel this way sometimes.</p>
+          <p data-editable="" contenteditable="false">&nbsp;</p>
+          <p data-editable="" contenteditable="false">When I feel worried, I can take a slow breath.</p>
+          <p data-editable="" contenteditable="false">I can find a trusted person. I can remember</p>
+          <p data-editable="" contenteditable="false">that the worried feeling will pass.</p>
+          <p data-editable="" contenteditable="false">&nbsp;</p>
+          <p data-editable="" contenteditable="false">I am doing really well. ✦</p>
+        </div>
+      </div>
+      <div class="format-badge">✏️ Handwritten — personal, familiar, and easy to make at home</div>
+    </div>
+
+  </div><!-- /viewer -->
+
+</div>
+
+
+
+
+</div><div class="divider-wrap"><div class="section-divider"></div></div><div data-section="added-1775282371444">
+  <section class="module-nav">
+    <div class="nav-inner">
+
+      <!-- Heading -->
+      <div class="nav-head">
+        <h2 data-editable="" contenteditable="false"><span style="color:var(--color-text-primary)" data-editable="" contenteditable="false">Learn it. Build it. Use it.</span><br><font color="#6e6e73"><span style="font-weight: 500;"><br>As many stories as you need,&nbsp;</span></font><div><font color="#6e6e73"><span style="font-weight: 500;">whenever you need them.&nbsp;</span></font></div></h2>
+      </div>
+
+
+      <!-- MODULE LIST -->
+      <div class="module-list" id="moduleList">
+
+        <!-- MODULE 1 — active / expanded -->
+        <div class="module-row" id="module-row-0">
+          <div class="module-spine">
+            <div class="spine-line" id="spine-0"></div>
+            <div class="module-circle" id="circle-0">1</div>
+          </div>
+          <div class="module-content">
+            <div class="module-header" onclick="toggleModule(0)" aria-expanded="false" aria-controls="lessons-0" id="mheader-0">
+              <div>
+                <div class="module-meta-label">Module 1</div>
+                <div class="module-title">What is a Wellbeing Story?</div>
+              </div>
+              <div class="module-right">
+                <span class="module-time" data-editable="" contenteditable="false">25 min</span>
+                <span class="chevron" id="chevron-0" data-editable="" contenteditable="false">⌃</span>
+              </div>
+            </div>
+            <div class="module-divider"></div>
+            <div class="lesson-list" id="lessons-0" role="list">
+              <div class="lesson-row">
+                <div class="lesson-left">
+                  <span class="lesson-name" id="name-0-0" data-editable="" contenteditable="false">Welcome</span>
+                </div>
+              </div>
+              <div class="lesson-row">
+                <div class="lesson-left">
+                  <span class="lesson-name" id="name-0-1" data-editable="" contenteditable="false">Reading the room</span>
+                </div>
+              </div>
+              <div class="lesson-row">
+                <div class="lesson-left">
+                  <span class="lesson-name" id="name-0-2" data-editable="" contenteditable="false">Meet the character</span>
+                </div>
+              </div>
+              <div class="lesson-row">
+                <div class="lesson-left">
+                  <span class="lesson-name" id="name-0-3" data-editable="" contenteditable="false">You don't have to be an expert</span>
+                </div>
+              </div>
+              <div class="lesson-row">
+                <div class="lesson-left">
+                  <span class="lesson-name" id="name-0-4" data-editable="" contenteditable="false">You're in good company</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 2 — closed -->
+        <div class="module-row" id="module-row-1">
+          <div class="module-spine">
+            <div class="spine-line" id="spine-1"></div>
+            <div class="module-circle" id="circle-1">2</div>
+          </div>
+          <div class="module-content">
+            <div class="module-header" onclick="toggleModule(1)" aria-expanded="false" aria-controls="lessons-1" id="mheader-1">
+              <div>
+                <div class="module-meta-label">Module 2</div>
+                <div class="module-title">Recognising the Signs</div>
+              </div>
+              <div class="module-right">
+                <span class="module-time" data-editable="" contenteditable="false">20 min</span>
+                <span class="chevron" id="chevron-1" data-editable="" contenteditable="false">⌃</span>
+              </div>
+            </div>
+            <div class="module-divider"></div>
+            <div class="lesson-list" id="lessons-1" role="list">
+              <div class="lesson-row">
+                <div class="lesson-left">
+                  <span class="lesson-name" id="name-1-0" data-editable="" contenteditable="false">What vicarious trauma looks like</span>
+                </div>
+              </div>
+              <div class="lesson-row">
+                <div class="lesson-left">
+                  <span class="lesson-name" id="name-1-1" data-editable="" contenteditable="false">Physical and emotional signals</span>
+                </div>
+              </div>
+              <div class="lesson-row">
+                <div class="lesson-left">
+                  <span class="lesson-name" id="name-1-2" data-editable="" contenteditable="false">Your personal baseline</span>
+                </div>
+              </div>
+              <div class="lesson-row">
+                <div class="lesson-left">
+                  <span class="lesson-name" id="name-1-3" data-editable="" contenteditable="false">Checking in with your team</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 3 — closed -->
+        <div class="module-row" id="module-row-2">
+          <div class="module-spine">
+            <div class="spine-line" id="spine-2"></div>
+            <div class="module-circle" id="circle-2">3</div>
+          </div>
+          <div class="module-content">
+            <div class="module-header" onclick="toggleModule(2)" aria-expanded="false" aria-controls="lessons-2" id="mheader-2">
+              <div>
+                <div class="module-meta-label">Module 3</div>
+                <div class="module-title">Building Your Toolkit</div>
+              </div>
+              <div class="module-right">
+                <span class="module-time" data-editable="" contenteditable="false">30 min</span>
+                <span class="chevron" id="chevron-2" data-editable="" contenteditable="false">⌃</span>
+              </div>
+            </div>
+            <div class="module-divider"></div>
+            <div class="lesson-list" id="lessons-2" role="list">
+              <div class="lesson-row">
+                <div class="lesson-left">
+                  <span class="lesson-name" id="name-2-0" data-editable="" contenteditable="false">Why self-care isn't enough</span>
+                </div>
+              </div>
+              <div class="lesson-row">
+                <div class="lesson-left">
+                  <span class="lesson-name" id="name-2-1" data-editable="" contenteditable="false">Regulating your nervous system</span>
+                </div>
+              </div>
+              <div class="lesson-row">
+                <div class="lesson-left">
+                  <span class="lesson-name" id="name-2-2" data-editable="" contenteditable="false">Boundaries that actually work</span>
+                </div>
+              </div>
+              <div class="lesson-row">
+                <div class="lesson-left">
+                  <span class="lesson-name" id="name-2-3" data-editable="" contenteditable="false">Peer support in practice</span>
+                </div>
+              </div>
+              <div class="lesson-row">
+                <div class="lesson-left">
+                  <span class="lesson-name" id="name-2-4" data-editable="" contenteditable="false">When to seek help</span>
+                </div>
+              </div>
+              <div class="lesson-row">
+                <div class="lesson-left">
+                  <span class="lesson-name" id="name-2-5" data-editable="" contenteditable="false">Your action plan</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 4 — closed, last -->
+        <div class="module-row" id="module-row-3">
+          <div class="module-spine">
+            <div class="module-circle" id="circle-3">4</div>
+          </div>
+          <div class="module-content">
+            <div class="module-header" onclick="toggleModule(3)" aria-expanded="false" aria-controls="lessons-3" id="mheader-3">
+              <div>
+                <div class="module-meta-label">Module 4</div>
+                <div class="module-title">Sustaining the Work</div>
+              </div>
+              <div class="module-right">
+                <span class="module-time" data-editable="" contenteditable="false">15 min</span>
+                <span class="chevron" id="chevron-3" data-editable="" contenteditable="false">⌃</span>
+              </div>
+            </div>
+            <div class="module-divider"></div>
+            <div class="lesson-list" id="lessons-3" role="list">
+              <div class="lesson-row">
+                <div class="lesson-left">
+                  <span class="lesson-name" id="name-3-0" data-editable="" contenteditable="false">Keeping the flame alive</span>
+                </div>
+              </div>
+              <div class="lesson-row">
+                <div class="lesson-left">
+                  <span class="lesson-name" id="name-3-1" data-editable="" contenteditable="false">Organisational responsibility</span>
+                </div>
+              </div>
+              <div class="lesson-row">
+                <div class="lesson-left">
+                  <span class="lesson-name" id="name-3-2" data-editable="" contenteditable="false">Closing reflection</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /module-list -->
+
+      <!-- COURSE DETAILS -->
+      <div class="details-wrap">
+        <button class="details-toggle-btn" onclick="toggleDetails()" id="detailsBtn" aria-expanded="false" aria-controls="detailsPanel" data-editable="" contenteditable="false">
+          Course details
+          <span class="toggle-chevron" id="toggleChevron" data-editable="" contenteditable="false">⌃</span>
+        </button>
+
+        <div class="details-panel" id="detailsPanel" role="region" aria-label="Course details">
+          <div class="panel-header">
+            <span class="panel-title" data-editable="" contenteditable="false">Course details</span>
+            <button class="panel-close-btn" onclick="toggleDetails()" aria-label="Close" data-editable="" contenteditable="false">×</button>
+          </div>
+
+          <div class="panel-grid">
+
+            <div class="panel-cell cell-full">
+              <span class="cell-label" data-editable="" contenteditable="false">By the end, you'll be able to&nbsp;</span>
+              <div class="objective-list">
+                <div class="objective-row"><span class="obj-text" data-editable="" contenteditable="false">Understand when a Social Story can help</span></div>
+                <div class="objective-row"><span class="obj-text" data-editable="" contenteditable="false">Apply evidence-based strategies to manage secondary stress</span></div>
+                <div class="objective-row"><span class="obj-text" data-editable="" contenteditable="false">Build a personal wellbeing action plan</span></div>
+                <div class="objective-row obj-extra"><span class="obj-text" data-editable="" contenteditable="false">Set sustainable boundaries that protect your wellbeing at work</span></div>
+                <div class="objective-row obj-extra"><span class="obj-text" data-editable="" contenteditable="false">Support colleagues showing signs of secondary traumatic stress</span></div>
+                <button class="obj-more-btn" id="objMoreBtn" onclick="toggleObjectives()" data-editable="" contenteditable="false">Show all objectives</button>
+              </div>
+            </div>
+
+            <div class="panel-cell">
+              <span class="cell-label" data-editable="" contenteditable="false">How you'll learn</span>
+              <div class="assessment-list">
+                <div class="assessment-row"><span class="assessment-name" data-editable="" contenteditable="false">Short reflections as you go</span></div>
+                <div class="assessment-row"><span class="assessment-name" data-editable="" contenteditable="false">Quick check-ins after each module</span></div>
+                <div class="assessment-row"><span class="assessment-name" data-editable="" contenteditable="false">Certificate when you're done</span></div>
+              </div>
+            </div>
+
+            <div class="panel-cell">
+              <span class="cell-label" data-editable="" contenteditable="false">How long will this take</span>
+              <div class="accred-tags">
+                <span class="accred-tag" data-editable="" contenteditable="false">Approx. 3 weeks</span>
+                <span class="accred-tag" data-editable="" contenteditable="false">10-15 mins per lesson</span>
+                <span class="accred-tag" data-editable="" contenteditable="false">One lesson 4 times a week</span>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="panel-footer">
+            <p class="footer-text" data-editable="" contenteditable="false">What if your whole team could write one?<br><i>Group discounts apply.&nbsp;</i></p>
+            <button class="enquire-btn" data-editable="" contenteditable="false">Getaquoteforyourteam</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /nav-inner -->
+  </section>
+
+  
+
+</div><div class="divider-wrap"><div class="section-divider"></div></div><div data-section="added-1775282437833">
+<section class="scenario-section">
+
+  <div class="scenario-card">
+
+    <div class="card-header">
+      <span class="card-header-label" data-editable="" contenteditable="false">Vicarious trauma</span>
+      <span class="step-strip" id="step-counter" data-editable="" contenteditable="false">Step 1 of 5</span>
+    </div>
+
+    <div class="card-content">
+
+    <!-- Screen 1: Context -->
+    <div class="screen active" id="screen-1">
+
+      <!-- Visual hero -->
+      <div class="context-hero">
+
+        <svg class="context-hero-svg" viewBox="0 0 340 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="260" cy="60" r="130" fill="rgba(29,29,31,0.04)"></circle>
+          <circle cx="310" cy="130" r="100" fill="rgba(29,29,31,0.04)"></circle>
+          <circle cx="220" cy="150" r="75" fill="rgba(29,29,31,0.05)"></circle>
+          <circle cx="290" cy="40" r="50" fill="rgba(29,29,31,0.03)"></circle>
+          <circle cx="160" cy="80" r="30" fill="rgba(29,29,31,0.03)"></circle>
+        </svg>
+
+        <!-- Heading anchored to bottom of hero -->
+        <h2 class="context-hero-heading" data-editable="" contenteditable="false">A 5-min preview of how you learn.</h2>
+      </div>
+
+      <!-- Type selector — between hero and rules -->
+      <div class="hero-type-selector">
+        <div class="context-pills">
+          <button class="context-pill selected" onclick="selectType(this)" data-editable="" contenteditable="false">Kindergarten</button>
+          <button class="context-pill" onclick="selectType(this)" data-editable="" contenteditable="false">Primary School</button>
+          <button class="context-pill" onclick="selectType(this)" data-editable="" contenteditable="false">High School</button>
+        </div>
+      </div>
+
+      <!-- Context copy — updates when pill changes -->
+      <div id="context-copy">
+        <p class="screen-body" data-editable="" contenteditable="false">Context is where learning lives or dies.</p>
+        <p class="screen-body" data-editable="" contenteditable="false">Your learner has to see themselves in the situation. Before anything else you design will matter.</p>
+        <p class="screen-body" data-editable="" contenteditable="false">Three decisions ahead. Let's find out how you think.</p>
+      </div>
+
+      <div class="btn-row" style="justify-content: flex-end;">
+        <button class="btn-primary" onclick="goTo(2)" data-editable="" contenteditable="false">Continue</button>
+      </div>
+    </div>
+
+    <!-- Screen 2: Challenge -->
+    <div class="screen" id="screen-2">
+
+      <p class="challenge-stakes" data-editable="" contenteditable="false">What you choose here will tell you something you might not expect.</p>
+
+      <div class="context-selector">
+        <div class="context-pills">
+          <button class="context-pill selected" onclick="selectContext(this)" data-editable="" contenteditable="false">Familiar</button>
+          <button class="context-pill" onclick="selectContext(this)" data-editable="" contenteditable="false">Stretching</button>
+          <button class="context-pill" onclick="selectContext(this)" data-editable="" contenteditable="false">Complex</button>
+        </div>
+      </div>
+
+      <div class="btn-row" style="justify-content: space-between;">
+        <button class="btn-quiet" onclick="goTo(1)" data-editable="" contenteditable="false">← Back</button>
+        <button class="btn-primary" onclick="goTo(3)" data-editable="" contenteditable="false">I'm ready</button>
+      </div>
+    </div>
+
+    <!-- Screen 3: Activity -->
+    <div class="screen" id="screen-3">
+      <div id="round-area">
+      <div class="round-content">
+        <div class="round-scenario"><p>It's 10:40 am. A Year 9 student you support pulls you aside in the corridor and says quietly:</p><p class="scenario-quote">"Something bad happened at home on the weekend. I don't really want to talk about it. I just wanted someone to know."</p><p>They look at the floor, then walk back to class.</p></div>
+
+        <div class="options-accordion">
+          <button class="options-trigger" id="optionsTrigger" onclick="revealOptions()">
+            <span>What would you do?</span>
+            <span class="options-trigger-chevron">▾</span>
+          </button>
+          <div class="options-list" id="optionsList" style="display:none;">
+            
+              <button class="option-btn" onclick="chooseOption(0)">
+                <span class="option-letter">A</span>
+                <span class="option-title">Acknowledge and let it rest</span>
+              </button>
+            
+              <button class="option-btn" onclick="chooseOption(1)">
+                <span class="option-letter">B</span>
+                <span class="option-title">Ask follow-up questions now</span>
+              </button>
+            
+              <button class="option-btn" onclick="chooseOption(2)">
+                <span class="option-letter">C</span>
+                <span class="option-title">Carry the worry home</span>
+              </button>
+            
+          </div>
+        </div>
+
+        <div class="btn-row" id="roundNextBtn" style="display:none; justify-content: flex-end;">
+          <button class="btn-primary" onclick="commitChoice()">Next</button>
+        </div>
+
+      </div>
+    </div>
+    </div>
+
+    <!-- Screen 4: Check-in -->
+    <div class="screen" id="screen-4">
+      <p class="challenge-stakes" data-editable="" contenteditable="false">How are you feeling right now?</p>
+
+      <div class="emotion-pills">
+        <button class="emotion-pill" onclick="toggleEmotion(this)" data-editable="" contenteditable="false">Curious</button>
+        <button class="emotion-pill" onclick="toggleEmotion(this)" data-editable="" contenteditable="false">Uncertain</button>
+        <button class="emotion-pill" onclick="toggleEmotion(this)" data-editable="" contenteditable="false">Challenged</button>
+        <button class="emotion-pill" onclick="toggleEmotion(this)" data-editable="" contenteditable="false">Reflective</button>
+        <button class="emotion-pill" onclick="toggleEmotion(this)" data-editable="" contenteditable="false">Overwhelmed</button>
+      </div>
+
+      <div class="btn-row" style="justify-content: flex-end;">
+        <button class="btn-primary" onclick="goTo(5)" data-editable="" contenteditable="false">Continue</button>
+      </div>
+    </div>
+
+    <!-- Screen 5: Feedback -->
+    <div class="screen" id="screen-5">
+
+      <p class="takeaway-text" id="takeawayText" data-editable="" contenteditable="false"></p>
+
+      <div class="btn-row" style="justify-content: space-between;">
+        <button class="btn-secondary" onclick="resetAll()" data-editable="" contenteditable="false">Try another</button>
+        <button class="btn-secondary" id="doneBtn" onclick="handleDone()" data-editable="" contenteditable="false">Done</button>
+      </div>
+    </div>
+
+    </div><!-- end card-content -->
+  </div><!-- end scenario-card -->
+</section>
+
+
+
+</div><div class="divider-wrap"><div class="section-divider"></div></div><div data-section="added-1775282469604">
+  <section class="pricing">
+    <div class="pricing-inner">
+
+      <!-- Heading -->
+      <div class="pricing-head">
+        <h2 data-editable="" contenteditable="false"><span style="color:var(--color-text-primary)" data-editable="" contenteditable="false">Start for free.</span><br><span style="color:var(--color-text-secondary);font-weight:500;" data-editable="" contenteditable="false">Stay because it works.</span></h2>
+      </div>
+
+
+      <!-- Pricing cards -->
+      <div class="card-grid">
+
+        <!-- Card 1 — Individual -->
+        <div class="price-card card-standard">
+          <span class="tier-label" data-editable="" contenteditable="false">Monthly</span>
+          <p class="card-tagline" data-editable="" contenteditable="false">Everything included. Cancel anytime.<br><br>3 days free. No card needed.</p>
+          <div class="price-block">
+            <div class="price-row">
+              <span class="price-amount" data-editable="" contenteditable="false">$29</span>
+              <span class="price-period" data-editable="" contenteditable="false">/mo</span>
+            </div>
+          </div>
+          <a href="#" class="cta-btn cta-solid" data-editable="" contenteditable="false">Start writing</a>
+        </div>
+
+        <!-- Card 2 — Best Value (featured) -->
+        <div class="price-card card-featured">
+          <div class="popular-badge">Most popular</div>
+          <span class="tier-label" data-editable="" contenteditable="false">Yearly</span>
+          <p class="card-tagline" data-editable="" contenteditable="false">Everything included. Try free for 14 days.&nbsp;<span style="letter-spacing: -0.204px;">No card needed.</span><br><br><i>May be covered by your workplace PD budget.&nbsp;</i></p>
+          <div class="price-block">
+            <div class="price-row">
+              <span class="price-amount" data-editable="" contenteditable="false">$199</span>
+              <span class="price-period" data-editable="" contenteditable="false">/yr</span>
+            </div>
+            </div>
+          <a href="#" class="cta-btn cta-solid" data-editable="" contenteditable="false">Start writing</a>
+        </div>
+
+        <!-- Card 3 — Schools & Teams -->
+        <div class="price-card card-standard">
+          <span class="tier-label" data-editable="" contenteditable="false">Schools &amp; Teams</span>
+          <p class="card-tagline" data-editable="" contenteditable="false">Get your whole team writing social stories. We'll make the pricing work.</p>
+          <div class="price-block">
+            <div class="price-row">
+              <span class="price-custom" data-editable="" contenteditable="false"><br></span>
+            </div>
+          </div>
+          <a href="#" class="cta-btn cta-solid" data-editable="" contenteditable="false">Talk to us</a>
+        </div>
+
+      </div><!-- /card-grid -->
+
+
+      <!-- Employer PD accordion -->
+      <div class="pd-accordion open" id="pdAccordion">
+        <div class="pd-header" onclick="togglePD()" aria-expanded="true" aria-controls="pdBody">
+          <span class="pd-title" data-editable="" contenteditable="false">This may be covered by your employer's professional development budget.</span>
+          <span class="pd-toggle-icon" id="pdToggleIcon" data-editable="" contenteditable="false">−</span>
+        </div>
+        <div class="pd-body" id="pdBody" role="region">
+          <div class="pd-body-inner">
+            <p data-editable="" contenteditable="false">Many employers cover PD costs. Just ask your manager.</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /pricing-inner -->
+  </section>
+
+  
+
+</div><div class="divider-wrap"><div class="section-divider"></div></div><div data-section="added-1775282486540">
+
+<div class="container">
+
+  <!-- ── Card 1 — PDF, required ── -->
+  <div class="resource-card">
+    <div class="rc-left">
+      <div class="rc-top-row">
+        <span class="rc-file-badge badge-pdf" data-editable="" contenteditable="false">PDF</span>
+        <span class="rc-size" data-editable="" contenteditable="false">1.2 MB</span>
+      </div>
+      <div>
+        <h3 class="rc-title" data-editable="" contenteditable="false">Every student is different. Your support should be too.&nbsp;</h3>
+        <p class="rc-desc" style="margin-top:6px;" data-editable="" contenteditable="false">&nbsp;A free guide to recognising Autism, ADHD, and PDA and what support helps.&nbsp;</p>
+      </div>
+      <div class="rc-divider"></div>
+      <div class="rc-actions">
+        <button class="btn-download" data-editable="" contenteditable="false">Downloadthefreeguide</button>
+      </div>
+    </div>
+    <div class="rc-right">
+      <div class="panel-pdf">
+        <div class="doc-page">
+          <div class="doc-accent-bar"></div>
+          <div class="doc-title-bar"></div>
+          <div class="doc-line" style="width:100%;"></div>
+          <div class="doc-line" style="width:88%;"></div>
+          <div style="display:flex; flex-direction:column; gap:5px; margin-top:3px;">
+            <div class="doc-check-row">
+              <div class="doc-check ticked"></div>
+              <div class="doc-check-line" style="width:70%;"></div>
+            </div>
+            <div class="doc-check-row">
+              <div class="doc-check"></div>
+              <div class="doc-check-line" style="width:55%;"></div>
+            </div>
+            <div class="doc-check-row">
+              <div class="doc-check"></div>
+              <div class="doc-check-line" style="width:65%;"></div>
+            </div>
+            <div class="doc-check-row">
+              <div class="doc-check"></div>
+              <div class="doc-check-line" style="width:48%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+</div><div class="divider-wrap"><div class="section-divider"></div></div><div data-section="added-1775282506081">
+  <section class="about-cta">
+    <div class="cta-inner">
+
+      <div class="cta-heading">
+        <h2 data-editable="" contenteditable="false">There's a student waiting for this story.</h2>
+      </div>
+
+      <p class="cta-body" data-editable="" contenteditable="false"><br></p>
+
+      <div class="cta-buttons">
+        <a href="#" class="btn-primary" data-editable="" contenteditable="false">Star your free trial&nbsp;</a>
+        <a href="#" class="btn-ghost" data-editable="" contenteditable="false">See inside the course</a>
+      </div>
+
+    </div>
+  </section>
+
+</div></div><!-- /sections-container -->
 
   <script>
   /* ====================================================
      BOOK COMPONENT
   ==================================================== */
   const pages = [
-    "This is body text inside the book component. Each page shares a story, a finding, or a practitioner insight that draws the learner in before the CTA.",
-    "This is body text on page two. A different angle, a new voice — building a picture of the problem that the product solves.",
-    "This is body text on page three. The narrative continues, drawing on real experiences and specific moments that resonate with the reader.",
-    "This is body text on page four. The case is almost made. Each page earns the trust that the CTA below will rely on.",
-    "This is body text on the final page. The story closes here, handing off naturally to the H2 and the call to action that follows."
-  ];
+  "We made this because education support workers told us their biggest problem. They don't have enough time to make social stories.",
+  "We looked at every course, workshop and webinar out there. The same pattern occurs. A full-day workshop with a presenter you'll never see again. Or a webinar so dense your eyes glaze over.",
+  "Two weeks later, you're sitting at your desk, staring at a blank page, and the presenter's number isn't on the certificate.",
+  "It shouldn't be this hard.",
+  "What if you could drink your coffee, enjoy your Tim Tam, answer a few questions, and have a social story ready before your morning-tea break is over?\n\nWe call it Story Builder."
+];
 
   let bookCurrent = 0;
 
@@ -685,20 +4325,72 @@
      PHOTO STORY COMPONENT
   ==================================================== */
   const PAGES = [
-    { gradient: 'linear-gradient(135deg,#f0ebe1,#e8dfd3)', label: 'Cover page — hand-drawn title: "When I Helped a New Friend"', emoji: '📖' },
-    { gradient: 'linear-gradient(135deg,#e8f0f8,#d8e8f4)', label: 'Jamie sits alone at the lunch table. There is an empty seat beside them.', emoji: '🪑' },
-    { gradient: 'linear-gradient(135deg,#fef3e8,#fde8d4)', label: 'A new student named Sam arrives and looks around the room nervously.', emoji: '👀' },
-    { gradient: 'linear-gradient(135deg,#edf5ee,#dceedd)', label: 'Jamie notices Sam looking for somewhere to sit.', emoji: '💭' },
-    { gradient: 'linear-gradient(135deg,#f8f0e8,#f0e4d8)', label: 'Jamie thinks: "Maybe I could say hello." A speech bubble is drawn above their head.', emoji: '✏️' },
-    { gradient: 'linear-gradient(135deg,#e8eff8,#d8e4f4)', label: 'Jamie takes a deep breath and gives a small wave across the table.', emoji: '👋' },
-    { gradient: 'linear-gradient(135deg,#fef8e8,#fdefd8)', label: 'Sam waves back and smiles. A big drawn smile fills the page.', emoji: '😊' },
-    { gradient: 'linear-gradient(135deg,#ecf4ee,#dceae0)', label: 'Sam walks over and sits down next to Jamie at the table.', emoji: '🤝' },
-    { gradient: 'linear-gradient(135deg,#f4eef8,#eadef4)', label: 'Jamie and Sam both open their lunch boxes and peek at what is inside.', emoji: '🥪' },
-    { gradient: 'linear-gradient(135deg,#fff0e8,#ffe4d4)', label: 'They both laugh at something funny. Wiggly laugh lines are drawn around them.', emoji: '😄' },
-    { gradient: 'linear-gradient(135deg,#e8f4f8,#d8ecf4)', label: 'The teacher walks past and gives Jamie a big thumbs up.', emoji: '👍' },
-    { gradient: 'linear-gradient(135deg,#f0f4e8,#e4ecdc)', label: 'At the end of the day, Jamie draws a heart in the middle of the page. They feel good inside.', emoji: '💛' },
-    { gradient: 'linear-gradient(135deg,#ede8f4,#e0d8ec)', label: 'Back cover — "The End. You did great, Jamie." Signed by the author.', emoji: '🌟' },
-  ];
+  {
+    "gradient": "linear-gradient(135deg,#f0ebe1,#e8dfd3)",
+    "label": "Cover page — hand-drawn title: \"When I Helped a New Friend\"",
+    "emoji": "📖"
+  },
+  {
+    "gradient": "linear-gradient(135deg,#e8f0f8,#d8e8f4)",
+    "label": "Jamie sits alone at the lunch table. There is an empty seat beside them.",
+    "emoji": "🪑"
+  },
+  {
+    "gradient": "linear-gradient(135deg,#fef3e8,#fde8d4)",
+    "label": "A new student named Sam arrives and looks around the room nervously.",
+    "emoji": "👀"
+  },
+  {
+    "gradient": "linear-gradient(135deg,#edf5ee,#dceedd)",
+    "label": "Jamie notices Sam looking for somewhere to sit.",
+    "emoji": "💭"
+  },
+  {
+    "gradient": "linear-gradient(135deg,#f8f0e8,#f0e4d8)",
+    "label": "Jamie thinks: \"Maybe I could say hello.\" A speech bubble is drawn above their head.",
+    "emoji": "✏️"
+  },
+  {
+    "gradient": "linear-gradient(135deg,#e8eff8,#d8e4f4)",
+    "label": "Jamie takes a deep breath and gives a small wave across the table.",
+    "emoji": "👋"
+  },
+  {
+    "gradient": "linear-gradient(135deg,#fef8e8,#fdefd8)",
+    "label": "Sam waves back and smiles. A big drawn smile fills the page.",
+    "emoji": "😊"
+  },
+  {
+    "gradient": "linear-gradient(135deg,#ecf4ee,#dceae0)",
+    "label": "Sam walks over and sits down next to Jamie at the table.",
+    "emoji": "🤝"
+  },
+  {
+    "gradient": "linear-gradient(135deg,#f4eef8,#eadef4)",
+    "label": "Jamie and Sam both open their lunch boxes and peek at what is inside.",
+    "emoji": "🥪"
+  },
+  {
+    "gradient": "linear-gradient(135deg,#fff0e8,#ffe4d4)",
+    "label": "They both laugh at something funny. Wiggly laugh lines are drawn around them.",
+    "emoji": "😄"
+  },
+  {
+    "gradient": "linear-gradient(135deg,#e8f4f8,#d8ecf4)",
+    "label": "The teacher walks past and gives Jamie a big thumbs up.",
+    "emoji": "👍"
+  },
+  {
+    "gradient": "linear-gradient(135deg,#f0f4e8,#e4ecdc)",
+    "label": "At the end of the day, Jamie draws a heart in the middle of the page. They feel good inside.",
+    "emoji": "💛"
+  },
+  {
+    "gradient": "linear-gradient(135deg,#ede8f4,#e0d8ec)",
+    "label": "Back cover — \"The End. You did great, Jamie.\" Signed by the author.",
+    "emoji": "🌟"
+  }
+];
 
   const TOTAL = PAGES.length;
   let photoCurrent = 0;
@@ -907,8 +4599,8 @@
     }
 
     // Strip builder toolbar and modal from saved file
-    html = html.replace(/<!-- BUILDER:TOOLBAR:START -->[\s\S]*?<!-- BUILDER:TOOLBAR:END -->/g, '');
-    html = html.replace(/<!-- BUILDER:MODAL:START -->[\s\S]*?<!-- BUILDER:MODAL:END -->/g, '');
+    html = html.replace(//g, '');
+    html = html.replace(//g, '');
 
     // Bake updated JS arrays
     html = html.replace(
@@ -939,5 +4631,388 @@
   }
   </script>
 
-</body>
-</html>
+
+
+<script>
+  /* ── view switcher ── */
+  function switchView(name) {
+    document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + name).classList.add('active');
+  }
+
+  /* ── book page turner ── */
+  const PAGES = [
+    {
+      leftLabel: 'Social Story · Carol Gray',
+      leftTitle: 'When I Feel Worried',
+      leftP1: 'Sometimes I feel worried. This can happen when something new is about to happen, or when I am not sure what to do next.',
+      leftP2: 'When I feel worried, my tummy might feel strange. My heart might beat a little faster. These feelings are normal. They happen to most people.',
+      rightP1: 'Other people — like teachers, parents, and friends — sometimes feel worried too. They understand that feeling worried is okay.',
+      rightP2: 'When I feel worried, I can take a slow, deep breath. I can find a trusted person and let them know how I am feeling.',
+      leftNum: '1', rightNum: '2'
+    },
+    {
+      leftLabel: '',
+      leftTitle: '',
+      leftP1: 'I can remind myself that the worried feeling will pass. Worried feelings do not last forever.',
+      leftP2: 'Taking slow breaths helps. Talking to someone I trust helps. Being in a quiet place helps.',
+      rightP1: 'My teachers and family know that I am working on managing my feelings. They are proud of me.',
+      rightP2: 'I am learning to manage worried feelings, and I am doing really well.',
+      leftNum: '3', rightNum: '4'
+    }
+  ];
+
+  let currentPage = 0;
+
+  function renderPage() {
+    const p = PAGES[currentPage];
+
+    const labelEl = document.getElementById('bookLeftLabel');
+    const titleEl = document.getElementById('bookLeftTitle');
+    const lp1 = document.getElementById('bookLeftP1');
+    const lp2 = document.getElementById('bookLeftP2');
+    const rp1 = document.getElementById('bookRightP1');
+    const rp2 = document.getElementById('bookRightP2');
+
+    labelEl.textContent = p.leftLabel;
+    labelEl.style.display = p.leftLabel ? '' : 'none';
+    titleEl.textContent = p.leftTitle;
+    titleEl.style.display = p.leftTitle ? '' : 'none';
+
+    lp1.textContent = p.leftP1;
+    lp2.textContent = p.leftP2;
+    rp1.textContent = p.rightP1;
+    rp2.textContent = p.rightP2;
+
+    document.getElementById('bookLeftNum').textContent  = p.leftNum;
+    document.getElementById('bookRightNum').textContent = p.rightNum;
+    document.getElementById('bookIndicator').textContent =
+      'Pages ' + p.leftNum + '–' + p.rightNum + ' of ' + (PAGES.length * 2);
+
+    document.getElementById('bookPrev').disabled = currentPage === 0;
+    document.getElementById('bookNext').disabled = currentPage === PAGES.length - 1;
+
+    // fade
+    const viewer = document.getElementById('bookViewer');
+    viewer.style.opacity = '0';
+    viewer.style.transition = 'opacity 0.18s';
+    setTimeout(() => { viewer.style.opacity = '1'; }, 50);
+  }
+
+  function turnPage(dir) {
+    currentPage = Math.max(0, Math.min(PAGES.length - 1, currentPage + dir));
+    renderPage();
+  }
+</script><script>
+    const lessonStates = [
+      [2, 1, 0, 0, 0],
+      [0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0],
+      [0, 0, 0],
+    ];
+
+    let expandedModule = 0;
+
+    function toggleModule(index) {
+      const wasExpanded = (expandedModule === index);
+      for (let i = 0; i < 4; i++) {
+        document.getElementById(`lessons-${i}`).classList.remove('open');
+        document.getElementById(`chevron-${i}`).classList.remove('open');
+        document.getElementById(`mheader-${i}`).setAttribute('aria-expanded', 'false');
+      }
+      if (!wasExpanded) {
+        document.getElementById(`lessons-${index}`).classList.add('open');
+        document.getElementById(`chevron-${index}`).classList.add('open');
+        document.getElementById(`mheader-${index}`).setAttribute('aria-expanded', 'true');
+        expandedModule = index;
+      } else {
+        expandedModule = -1;
+      }
+      updateSpineAndCircles();
+    }
+
+    function advanceLesson(mIdx, lIdx) {
+      const cur = lessonStates[mIdx][lIdx];
+      lessonStates[mIdx][lIdx] = cur === 2 ? 0 : cur + 1;
+      renderLesson(mIdx, lIdx);
+      updateSpineAndCircles();
+    }
+
+    function renderLesson(mIdx, lIdx) {
+      const state = lessonStates[mIdx][lIdx];
+      const dot   = document.getElementById(`dot-${mIdx}-${lIdx}`);
+      const name  = document.getElementById(`name-${mIdx}-${lIdx}`);
+      const row   = dot.closest('.lesson-row');
+      dot.className  = 'lesson-dot';
+      name.className = 'lesson-name';
+      row.className  = 'lesson-row';
+      if (state === 2) {
+        dot.classList.add('completed'); name.classList.add('completed'); row.classList.add('completed');
+      } else if (state === 1) {
+        dot.classList.add('in-progress'); name.classList.add('in-progress'); row.classList.add('in-progress');
+      } else {
+        dot.classList.add('not-started');
+      }
+    }
+
+    function updateSpineAndCircles() {
+      for (let i = 0; i < 4; i++) {
+        const circle = document.getElementById(`circle-${i}`);
+        const spine  = document.getElementById(`spine-${i}`);
+        const isActive = (expandedModule === i);
+        circle.classList.toggle('active', isActive);
+        if (spine) spine.classList.toggle('active', isActive);
+      }
+    }
+
+    function toggleObjectives() {
+      const extras = document.querySelectorAll('.obj-extra');
+      const btn = document.getElementById('objMoreBtn');
+      const isHidden = extras[0].style.display !== 'flex';
+      extras.forEach(el => el.style.display = isHidden ? 'flex' : 'none');
+      btn.textContent = isHidden ? 'Show less' : 'Show all objectives';
+    }
+
+    function toggleDetails() {
+      const panel   = document.getElementById('detailsPanel');
+      const chevron = document.getElementById('toggleChevron');
+      const btn     = document.getElementById('detailsBtn');
+      const isOpen  = panel.classList.contains('open');
+      panel.classList.toggle('open', !isOpen);
+      chevron.classList.toggle('open', !isOpen);
+      btn.setAttribute('aria-expanded', String(!isOpen));
+    }
+
+    updateSpineAndCircles();
+  </script><script>
+  const ROUNDS = [
+    {
+      label: 'Round 1 of 3',
+      scenario: `<p>It's 10:40 am. A Year 9 student you support pulls you aside in the corridor and says quietly:</p><p class="scenario-quote">"Something bad happened at home on the weekend. I don't really want to talk about it. I just wanted someone to know."</p><p>They look at the floor, then walk back to class.</p>`,
+      options: [
+        { letter: 'A', title: 'Acknowledge and let it rest', body: 'You say: "Thank you for trusting me with that. I\'m here whenever you\'re ready." You note it briefly in your records and allow the student to set the pace.' },
+        { letter: 'B', title: 'Ask follow-up questions now', body: 'You call them back and ask what happened, wanting to understand the situation fully so you can help. The student looks uncomfortable but answers.' },
+        { letter: 'C', title: 'Carry the worry home', body: 'You feel unsettled all day. That evening you replay the moment repeatedly, wondering if you should have done more.' },
+      ],
+      consequences: [
+        { chose: 'A — Acknowledge and let it rest', text: 'This response honours the student\'s boundaries while keeping the door open. It signals safety without pressure — one of the most protective things you can offer. Importantly, it also protects you: you\'ve responded thoughtfully without absorbing more than the student chose to share.' },
+        { chose: 'B — Ask follow-up questions now', text: 'Your instinct to help is genuine, but drawing out more detail than the student offered can overwhelm both of you. The student had already decided how much to share. Pressing for more can close the door to future trust — and exposes you to vicarious trauma risk from unsolicited detail.' },
+        { chose: 'C — Carry the worry home', text: 'This is a very common response — and a warning sign. Ruminating after a student disclosure is one of the earliest indicators of vicarious trauma accumulation. It\'s not a personal failing, but it does signal that you may need stronger containment strategies or supervision support.' },
+      ],
+    },
+    {
+      label: 'Round 2 of 3',
+      scenario: `<p>By Thursday afternoon you've had four one-to-one sessions this week with students dealing with family breakdown, grief, and food insecurity.</p><p>You're sitting in the staffroom between sessions and realise you feel completely hollow — like there's nothing left to give.</p>`,
+      options: [
+        { letter: 'A', title: 'Push through — students need you', body: 'You splash water on your face, tell yourself to focus, and go back in. You\'ve felt this way before and managed.' },
+        { letter: 'B', title: 'Name it and take a micro-break', body: 'You acknowledge to yourself: "I\'m depleted." You spend five minutes outside, breathing. You make a note to debrief with your supervisor this week.' },
+        { letter: 'C', title: 'Cancel your last session', body: 'You message the classroom teacher to say you\'re unwell and head home early, feeling guilty the whole way.' },
+      ],
+      consequences: [
+        { chose: 'A — Push through', text: 'Compassion fatigue thrives on this response. Repeatedly overriding your own depletion signals teaches your nervous system that emptiness is normal — until it isn\'t anymore. Students also feel when a support person is running on empty, even if they can\'t name it.' },
+        { chose: 'B — Name it and take a micro-break', text: 'This is the most sustainable response. Naming the feeling reduces its grip. A micro-break doesn\'t fix everything, but it interrupts the accumulation cycle. Scheduling a supervision debrief turns a hard week into professional development rather than silent erosion.' },
+        { chose: 'C — Cancel your last session', text: 'Sometimes stepping back is exactly right. The issue here is the guilt — it suggests you don\'t yet see your own wellbeing as a professional responsibility. Rest is a legitimate and necessary part of this work, not a failure of it.' },
+      ],
+    },
+    {
+      label: 'Round 3 of 3',
+      scenario: `<p>Your colleague Priya has been quieter than usual for weeks. Today you notice she walked past a student in the corridor who was clearly upset — she just didn't seem to see him.</p><p>After school, she mentions she's been having strange dreams and finding it hard to concentrate at home.</p>`,
+      options: [
+        { letter: 'A', title: 'Say nothing — it\'s not your place', body: 'You figure Priya will ask for help if she needs it. You don\'t want to overstep or make her feel watched.' },
+        { letter: 'B', title: 'Check in gently and name what you\'ve noticed', body: 'Later, privately, you say: "I\'ve noticed you seem a bit flat lately. How are you actually going?" You name what you\'ve seen without diagnosing or alarming her.' },
+        { letter: 'C', title: 'Report your concerns to the principal', body: 'You\'re worried about the student Priya missed. You go straight to leadership to flag that she might not be coping.' },
+      ],
+      consequences: [
+        { chose: 'A — Say nothing', text: 'Vicarious trauma deepens in silence. The symptoms Priya is describing — emotional numbing, intrusive dreams, difficulty concentrating — are clinical signs, not personality quirks. Waiting for her to self-refer is unlikely to help and may allow the situation to deteriorate.' },
+        { chose: 'B — Check in gently', text: 'Peer care is often the most powerful intervention available. Naming what you\'ve observed (without catastrophising) opens a conversation Priya may not have been able to start herself. You don\'t need to fix anything — making the invisible visible is often enough to change the trajectory.' },
+        { chose: 'C — Go to leadership', text: 'Your concern for the student is understandable, but bypassing Priya risks breaking trust and making her feel surveilled rather than supported. In most cases, a direct peer conversation comes first. Escalation is more appropriate if students are at immediate risk or if the situation doesn\'t improve.' },
+      ],
+    },
+  ];
+
+  const FEEDBACK = [
+    [
+      { short: 'A — Acknowledge and let it rest', text: 'A thoughtful response that protects both the student\'s autonomy and your own boundaries. Holding space without absorbing unnecessary detail is a core protective skill in this work.' },
+      { short: 'B — Ask follow-up questions', text: 'Your instinct to help is strong — but pressing for detail the student didn\'t offer can expose you to more vicarious trauma while actually reducing student trust. Restraint is a skill worth practising.' },
+      { short: 'C — Carry the worry home', text: 'Ruminating after disclosures is one of the earliest warning signs of vicarious trauma accumulation. This pattern suggests containment strategies or regular supervision may help significantly.' },
+    ],
+    [
+      { short: 'A — Push through', text: 'Overriding depletion signals repeatedly is how compassion fatigue becomes chronic. Sustainable support requires you to refuel — not just endure. Your students benefit most when you\'re genuinely present, not depleted.' },
+      { short: 'B — Name it and take a micro-break', text: 'Excellent self-awareness. Naming depletion, taking a brief reset, and scheduling supervision turns a hard week into a manageable one. This is the model — and it\'s worth repeating until it becomes automatic.' },
+      { short: 'C — Cancel the session', text: 'Rest is legitimate. The task for you is to detach the guilt — your wellbeing is a professional responsibility, not a self-indulgence. Without you functioning well, the students lose something too.' },
+    ],
+    [
+      { short: 'A — Say nothing', text: 'Vicarious trauma deepens in silence. The symptoms Priya described are clinical warning signs. Waiting for her to self-refer is unlikely to help — and a brief check-in from you costs very little.' },
+      { short: 'B — Check in gently', text: 'Peer care in action. You don\'t need to fix it — you just need to make it visible. This kind of simple check-in is often the intervention that matters most, and the one most people wish someone had offered sooner.' },
+      { short: 'C — Go to leadership first', text: 'Escalation has its place, but direct peer support usually comes first. Going straight to leadership risks making Priya feel watched rather than cared for — and may close the door on her seeking help at all.' },
+    ],
+  ];
+
+  const PROTECTIVE_IDX = [0, 1, 1];
+
+  const TAKEAWAYS = [
+    'Your responses suggest you may be carrying more than you realise. That\'s not a failure — it\'s information. Building in regular supervision, peer check-ins, and clear containment routines can make a significant difference. Small changes compound quickly in this kind of work.',
+    'You\'re developing real self-awareness, with some habits that need strengthening. The patterns worth watching are the ones where care for others outpaces care for yourself. You can\'t sustain what you don\'t replenish.',
+    'You show strong instincts around boundaries and peer care. The next step is making these habits deliberate and consistent — especially on weeks that accumulate fast. Consider what your containment routine looks like after a particularly heavy day.',
+    'You\'re navigating this well. Strong boundaries, peer awareness, and the ability to name your own state are protective factors that matter enormously over a career. Keep them visible and intentional.',
+  ];
+
+  let currentScreen  = 1;
+  let currentRound   = 0;
+  let choices        = [];
+  let selectedContext = null;
+  let selectedType   = 'Kindergarten';
+
+  const TYPE_COPY = {
+    'Kindergarten': `
+      <p class="screen-body">Context is where learning lives or dies.</p>
+      <p class="screen-body">Your learner has to see themselves in the situation. Before anything else you design will matter.</p>
+      <p class="screen-body">Three decisions ahead. Let's find out how you think.</p>`,
+    'Primary School': `
+      <p class="screen-body">Primary school learners connect through story and play. The situation has to feel like their world — not an adult's version of it.</p>
+      <p class="screen-body">Good context at this level is concrete, familiar, and emotionally honest. They need to see themselves in it before they'll engage with it.</p>
+      <p class="screen-body">Three decisions ahead. Let's find out how you think.</p>`,
+    'High School': `
+      <p class="screen-body">High school learners can smell inauthenticity from a mile away. The scenario has to be genuinely relevant — or they're gone.</p>
+      <p class="screen-body">Context at this level means real stakes, real pressure, and situations that respect their intelligence and experience.</p>
+      <p class="screen-body">Three decisions ahead. Let's find out how you think.</p>`,
+  };
+
+  function selectType(el) {
+    el.closest('.context-pills').querySelectorAll('.context-pill').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedType = el.textContent.trim();
+    const copy = document.getElementById('context-copy');
+    if (copy && TYPE_COPY[selectedType]) copy.innerHTML = TYPE_COPY[selectedType];
+  }
+
+  function selectContext(el) {
+    el.closest('.context-pills').querySelectorAll('.context-pill').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedContext = el.textContent.trim();
+  }
+
+  buildRound(0);
+
+  function goTo(n) {
+    document.getElementById(`screen-${currentScreen}`).classList.remove('active');
+    currentScreen = n;
+    document.getElementById(`screen-${n}`).classList.add('active');
+    updateCounter(n);
+    if (n === 5) buildFeedback();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateCounter(activeStep) {
+    document.getElementById('step-counter').textContent = `Step ${activeStep} of 5`;
+  }
+
+
+
+  function buildRound(idx) {
+    const r    = ROUNDS[idx];
+    const area = document.getElementById('round-area');
+    area.innerHTML = `
+      <div class="round-content">
+        <div class="round-scenario">${r.scenario}</div>
+
+        <div class="options-accordion">
+          <button class="options-trigger" id="optionsTrigger" onclick="revealOptions()">
+            <span>What would you do?</span>
+            <span class="options-trigger-chevron">▾</span>
+          </button>
+          <div class="options-list" id="optionsList" style="display:none;">
+            ${r.options.map((o, i) => `
+              <button class="option-btn" onclick="chooseOption(${i})">
+                <span class="option-letter">${o.letter}</span>
+                <span class="option-title">${o.title}</span>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="btn-row" id="roundNextBtn" style="display:none; justify-content: flex-end;">
+          <button class="btn-primary" onclick="commitChoice()">${currentRound < ROUNDS.length - 1 ? 'Next' : 'Continue'}</button>
+        </div>
+
+      </div>
+    `;
+  }
+
+  function revealOptions() {
+    const trigger = document.getElementById('optionsTrigger');
+    const list    = document.getElementById('optionsList');
+    trigger.classList.add('open');
+    trigger.disabled = true;
+
+    list.style.display = 'flex';
+  }
+
+  let pendingChoice = null;
+
+  function chooseOption(optIdx) {
+    pendingChoice = optIdx;
+    document.querySelectorAll('.option-btn').forEach((b, i) => {
+      b.classList.toggle('selected', i === optIdx);
+    });
+    document.getElementById('roundNextBtn').style.display = 'flex';
+  }
+
+  function commitChoice() {
+    choices.push(pendingChoice);
+    pendingChoice = null;
+    if (currentRound < ROUNDS.length - 1) {
+      currentRound++;
+      buildRound(currentRound);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      goTo(4);
+    }
+  }
+
+function toggleEmotion(el) {
+    el.classList.toggle('selected');
+  }
+
+  function buildFeedback() {
+    const protectiveCount = choices.filter((c, i) => c === PROTECTIVE_IDX[i]).length;
+    document.getElementById('takeawayText').textContent = TAKEAWAYS[protectiveCount];
+  }
+
+  function handleDone() {
+    const btn = document.getElementById('doneBtn');
+    btn.textContent = '✓ Done';
+    btn.disabled = true;
+  }
+
+  function resetAll() {
+    choices      = [];
+    currentRound = 0;
+    pendingChoice = null;
+    buildRound(0);
+    document.querySelectorAll('.emotion-pill').forEach(p => p.classList.remove('selected'));
+    const doneBtn = document.getElementById('doneBtn');
+    if (doneBtn) { doneBtn.textContent = 'Done'; doneBtn.disabled = false; }
+    goTo(1);
+  }
+
+  function selectEmoji(el) {
+    document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+</script><script>
+    // ── Employer PD accordion ──
+    function togglePD() {
+      const el  = document.getElementById('pdAccordion');
+      const icon = document.getElementById('pdToggleIcon');
+      const header = el.querySelector('.pd-header');
+      const isOpen = el.classList.contains('open');
+      el.classList.toggle('open', !isOpen);
+      icon.textContent = isOpen ? '+' : '−';
+      header.setAttribute('aria-expanded', String(!isOpen));
+    }
+
+    // Init
+  </script></body></html>
